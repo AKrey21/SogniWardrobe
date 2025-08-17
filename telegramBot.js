@@ -3,7 +3,23 @@ const TelegramBot = require('node-telegram-bot-api');
 
 // ---------- constants ----------
 const GENDERS = ['Male', 'Female', 'Unisex'];
-const STYLES  = ['Streetwear','Casual','Smart Casual','Business Formal','Minimalist','Athleisure','Vintage','Techwear'];
+const STYLES = [
+  'Formal',
+  'Casual',
+  'Smart Casual',
+  'Business Casual',
+  'Streetwear',
+  'Preppy',
+  'Minimalist',
+  'Vintage',
+  'Workwear',
+  'Techwear',
+  'Grunge',
+  'Skater',
+  'Bohemian',
+  'Festival',
+  'Y2K'
+];
 // reduced default batch size; overridable via env
 const DEFAULT_BATCH = Number(process.env.SOGNI_BATCH || 3);
 
