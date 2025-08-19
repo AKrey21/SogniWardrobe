@@ -1,173 +1,465 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sogni Wardrobe — Web</title>
-  <link rel="icon" href="data:," />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <style>
-    :root { --bg:#0b0b0b; --panel:#121212; --muted:#9aa0a6; --text:#e8eaed; --brand:#6ee7ff; --accent:#a78bfa; }
-    * { box-sizing:border-box; }
-    html,body { height:100%; }
-    body {
-      margin:0; background: radial-gradient(1000px 400px at 20% -10%, rgba(167,139,250,.15), transparent),
-                       radial-gradient(800px 400px at 120% 20%, rgba(110,231,255,.15), transparent),
-                       var(--bg);
-      color:var(--text); font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Noto Sans", Arial, sans-serif;
-    }
-    header { padding:24px 20px; display:flex; align-items:center; justify-content:space-between; max-width:1050px; margin:0 auto; }
-    header h1 { margin:0; font-size:clamp(18px,3vw,28px); letter-spacing:.3px; }
-    header .beta { font-size:12px; color:var(--muted); background:#222; padding:4px 8px; border-radius:999rem; border:1px solid #333; }
-    main { max-width:1050px; margin:0 auto; padding: 8px 20px 40px; }
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:18px; padding:18px; backdrop-filter: blur(8px);
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-    }
-    .grid { display:grid; gap:16px; grid-template-columns: 1fr; }
-    @media (min-width: 760px) { .grid { grid-template-columns: 380px 1fr; } }
-    label { display:block; margin-bottom:6px; color:var(--muted); font-size:13px; }
-    select, input[type="text"], input[type="number"], button {
-      width:100%; padding:12px 14px; border-radius:12px; border:1px solid #2a2a2a; background:#0f0f0f; color:#e8eaed;
-    }
-    button { cursor:pointer; font-weight:600; letter-spacing:.2px; }
-    .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
-    .muted { color:var(--muted); font-size:13px; }
-    .actions { display:flex; gap:10px; align-items:center; }
-    .actions button.primary { background:linear-gradient(90deg, var(--brand), var(--accent)); border:0; }
-    .actions button.secondary { background:#141414; }
-    .images { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:12px; }
-    .images img { width:100%; height:360px; object-fit:cover; border-radius:16px; border:1px solid #2f2f2f; background:#111; }
-    .badge { display:inline-flex; align-items:center; gap:6px; border:1px solid #2a2a2a; padding:6px 10px; border-radius:999rem; font-size:12px; background:#0f0f0f; }
-    .hidden { display:none !important; }
-    .spinner { width:22px; height:22px; border:3px solid #2a2a2a; border-top-color:#8ab4f8; border-radius:50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(1turn); } }
-    footer { max-width:1050px; margin:32px auto; padding:0 20px 32px; color:var(--muted); font-size:13px; }
-    footer a { color: var(--brand); text-decoration: none; }
-    .err { color:#ffb4b4; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Sogni Wardrobe <span class="beta">web beta</span></h1>
-    <div class="badge">fast demo</div>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sogni Wardrobe — Web</title>
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <style>
+      :root {
+        --bg: #0b0b0b;
+        --panel: #121212;
+        --muted: #9aa0a6;
+        --text: #e8eaed;
+        --brand: #6ee7ff;
+        --accent: #a78bfa;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: radial-gradient(
+            1000px 400px at 20% -10%,
+            rgba(167, 139, 250, 0.15),
+            transparent
+          ),
+          radial-gradient(
+            800px 400px at 120% 20%,
+            rgba(110, 231, 255, 0.15),
+            transparent
+          ),
+          var(--bg);
+        color: var(--text);
+        font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Inter,
+          "Noto Sans", Arial, sans-serif;
+      }
+      header {
+        padding: 24px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1050px;
+        margin: 0 auto;
+      }
+      header h1 {
+        margin: 0;
+        font-size: clamp(18px, 3vw, 28px);
+        letter-spacing: 0.3px;
+      }
+      header .beta {
+        font-size: 12px;
+        color: var(--muted);
+        background: #222;
+        padding: 4px 8px;
+        border-radius: 999rem;
+        border: 1px solid #333;
+      }
+      main {
+        max-width: 1050px;
+        margin: 0 auto;
+        padding: 8px 20px 40px;
+      }
+      .card {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.05),
+          rgba(255, 255, 255, 0.02)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 18px;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      }
+      .grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 1fr;
+      }
+      @media (min-width: 760px) {
+        .grid {
+          grid-template-columns: 380px 1fr;
+        }
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      select,
+      input[type="text"],
+      input[type="number"],
+      button {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #2a2a2a;
+        background: #0f0f0f;
+        color: #e8eaed;
+      }
+      button {
+        cursor: pointer;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .row3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .actions button.primary {
+        background: linear-gradient(90deg, var(--brand), var(--accent));
+        border: 0;
+      }
+      .actions button.secondary {
+        background: #141414;
+      }
+      .images {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
+      }
+      .images img {
+        width: 100%;
+        height: 360px;
+        object-fit: cover;
+        border-radius: 16px;
+        border: 1px solid #2f2f2f;
+        background: #111;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid #2a2a2a;
+        padding: 6px 10px;
+        border-radius: 999rem;
+        font-size: 12px;
+        background: #0f0f0f;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .spinner {
+        width: 22px;
+        height: 22px;
+        border: 3px solid #2a2a2a;
+        border-top-color: #8ab4f8;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(1turn);
+        }
+      }
+      footer {
+        max-width: 1050px;
+        margin: 32px auto;
+        padding: 0 20px 32px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      footer a {
+        color: var(--brand);
+        text-decoration: none;
+      }
+      .err {
+        color: #ffb4b4;
+      }
+      .input-mode-toggle {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 14px;
+        border: 1px solid #2a2a2a;
+        border-radius: 12px;
+        padding: 6px;
+        background: #0f0f0f;
+      }
+      .input-mode-toggle label {
+        flex: 1;
+        text-align: center;
+        margin: 0;
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .input-mode-toggle input[type="radio"] {
+        display: none;
+      }
+      .input-mode-toggle input[type="radio"]:checked + label {
+        background-color: #222;
+        color: var(--text);
+        font-weight: 600;
+      }
+      .upload-area {
+        border: 2px dashed #2a2a2a;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.2s, border-color 0.2s;
+      }
+      .upload-area:hover {
+        background-color: #1a1a1a;
+        border-color: #444;
+      }
+      .upload-area input[type="file"] {
+        display: none;
+      }
+      /* UPDATED: Styles for the multi-image preview container */
+      #image-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 10px;
+      }
+      #image-preview-container img {
+        max-width: 80px;
+        max-height: 80px;
+        border-radius: 8px;
+        border: 1px solid #2f2f2f;
+        object-fit: cover;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Sogni Wardrobe <span class="beta">web beta</span></h1>
+      <div class="badge">hybrid demo</div>
+    </header>
 
-  <main class="grid">
-    <section class="card">
-      <div style="display:grid; gap:14px;">
-        <div class="row3">
+    <main class="grid">
+      <section class="card">
+        <div style="display: grid; gap: 14px">
           <div>
-            <label for="gender">Gender</label>
-            <select id="gender">
-              <option>Male</option>
-              <option>Female</option>
-              <option>Unisex</option>
+            <label>1. Choose Your Input Method</label>
+            <div class="input-mode-toggle">
+              <input
+                type="radio"
+                id="mode-text"
+                name="input_mode"
+                value="text"
+                checked
+              />
+              <label for="mode-text">Describe Item</label>
+              <input
+                type="radio"
+                id="mode-image"
+                name="input_mode"
+                value="image"
+              />
+              <label for="mode-image">Upload Photos</label>
+            </div>
+          </div>
+
+          <div id="text-input-container">
+            <label for="item">Item to style (e.g., “baby tee”)</label>
+            <input
+              id="item"
+              type="text"
+              placeholder='e.g., "dark low-rise jeans"'
+            />
+          </div>
+
+          <div id="image-input-container" class="hidden">
+            <label for="image-upload"
+              >Upload photos of your items (e.g., shirt + pants)</label
+            >
+            <label for="image-upload" class="upload-area">
+              <span id="upload-text">Click to select up to 5 images</span>
+              <div id="image-preview-container"></div>
+            </label>
+            <input type="file" id="image-upload" accept="image/*" multiple />
+          </div>
+
+          <div>
+            <label>2. Describe yourself & the desired style</label>
+            <div class="row3">
+              <div>
+                <label for="gender">Gender</label
+                ><select id="gender">
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Unisex</option>
+                </select>
+              </div>
+              <div>
+                <label for="race">Race (SG)</label
+                ><select id="race">
+                  <option>Chinese</option>
+                  <option>Malay</option>
+                  <option>Indian</option>
+                  <option>Eurasian</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label for="complexion">Complexion</label
+                ><select id="complexion">
+                  <option>Fair</option>
+                  <option>Light-medium</option>
+                  <option>Medium</option>
+                  <option>Tan</option>
+                  <option>Deep</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="height">Height (cm)</label
+              ><input
+                id="height"
+                type="number"
+                min="140"
+                max="210"
+                placeholder="e.g., 165"
+              />
+            </div>
+            <div>
+              <label for="weight">Weight (kg)</label
+              ><input
+                id="weight"
+                type="number"
+                min="35"
+                max="160"
+                placeholder="e.g., 60"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="style">Style</label>
+            <select id="style">
+              <option>Formal</option>
+              <option>Casual</option>
+              <option>Smart Casual</option>
+              <option>Business Casual</option>
+              <option>Streetwear</option>
+              <option>Preppy</option>
+              <option>Minimal</option>
+              <option>Vintage</option>
+              <option>Workwear</option>
+              <option>Techwear</option>
+              <option>Grunge</option>
+              <option>Skater</option>
+              <option>Bohemian</option>
+              <option>Festival</option>
+              <option>Y2K</option>
+              <option>Cottagecore</option>
+              <option>Dark Academia</option>
+              <option>Gorpcore</option>
             </select>
           </div>
-          <div>
-            <label for="race">Race (SG)</label>
-            <select id="race">
-              <option>Chinese</option>
-              <option>Malay</option>
-              <option>Indian</option>
-              <option>Eurasian</option>
-              <option>Other</option>
-            </select>
+
+          <div class="row">
+            <div>
+              <label for="batch">Photos per run</label>
+              <select id="batch">
+                <option>1</option>
+                <option selected>3</option>
+                <option>4</option>
+                <option>6</option>
+              </select>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <div class="muted">
+                Uses Sogni’s <code>spark</code> tokens; defaults tuned for SG
+                lookbook shots.
+              </div>
+            </div>
           </div>
-          <div>
-            <label for="complexion">Complexion</label>
-            <select id="complexion">
-              <option>Fair</option>
-              <option>Light-medium</option>
-              <option>Medium</option>
-              <option>Tan</option>
-              <option>Deep</option>
-            </select>
+
+          <div class="actions">
+            <button id="go" class="primary">Generate</button>
+            <button id="regen" class="secondary">Regenerate</button>
+            <div id="loading" class="spinner hidden" aria-label="Loading"></div>
           </div>
+          <div id="status" class="muted"></div>
         </div>
+      </section>
 
-        <div class="row">
-          <div>
-            <label for="height">Height (cm)</label>
-            <input id="height" type="number" min="140" max="210" placeholder="e.g., 165" />
-          </div>
-          <div>
-            <label for="weight">Weight (kg)</label>
-            <input id="weight" type="number" min="35" max="160" placeholder="e.g., 60" />
-          </div>
+      <section class="card">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+          "
+        >
+          <div class="muted">Results</div>
         </div>
+        <div id="images" class="images"></div>
+      </section>
+    </main>
 
-<div>
-  <label for="style">Style</label>
-  <select id="style">
-    <option>Formal</option>
-    <option>Casual</option>
-    <option>Smart Casual</option>
-    <option>Business Casual</option>
-    <option>Streetwear</option>
-    <option>Preppy</option>
-    <option>Minimal</option>
-    <option>Vintage</option>
-    <option>Workwear</option>
-    <option>Techwear</option>
-    <option>Grunge</option>
-    <option>Skater</option>
-    <option>Bohemian</option>
-    <option>Festival</option>
-    <option>Y2K</option>
-    <option>Cottagecore</option>
-    <option>Dark Academia</option>
-    <option>Gorpcore</option>
-  </select>
-</div>
+    <footer>
+      <p>
+        Tip: You can either describe an item or upload one or more photos of
+        your items for the AI to analyze.
+      </p>
+      <p>
+        Built for NTU x Base hackathon demo. This web app <em>doesn’t</em> need
+        Telegram.
+      </p>
+    </footer>
 
-        <div>
-          <label for="item">Item to style (e.g., “baby tee”)</label>
-          <input id="item" type="text" placeholder='e.g., "baby tee" or "dark low-rise jeans"' />
-        </div>
+    <script>
+      const imageUploadInput = document.getElementById("image-upload");
+      const previewContainer = document.getElementById(
+        "image-preview-container"
+      );
+      const uploadText = document.getElementById("upload-text");
 
-        <div class="row">
-          <div>
-            <label for="batch">Photos per run</label>
-            <select id="batch">
-              <option>1</option>
-              <option selected>3</option>
-              <option>4</option>
-              <option>6</option>
-            </select>
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <div class="muted">Uses Sogni’s <code>spark</code> tokens; defaults tuned for SG lookbook shots.</div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button id="go" class="primary">Generate</button>
-          <button id="regen" class="secondary">Regenerate</button>
-          <div id="loading" class="spinner hidden" aria-label="Loading"></div>
-        </div>
-        <div id="status" class="muted"></div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-        <div class="muted">Results</div>
-      </div>
-      <div id="images" class="images"></div>
-    </section>
-  </main>
-
-  <footer>
-    <p>Tip: keep prompts simple. Example: Gender “Unisex”, Style “Techwear”, Item “black techwear hoodie”.</p>
-    <p>Built for NTU x Base hackathon demo. This web app <em>doesn’t</em> need Telegram.</p>
-  </footer>
-
-  <script src="./app.js"></script>
-</body>
+      imageUploadInput.addEventListener("change", (event) => {
+        previewContainer.innerHTML = ""; // Clear previous previews
+        const files = event.target.files;
+        if (files && files.length > 0) {
+          uploadText.textContent = `${files.length} image(s) selected`;
+          for (const file of files) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const img = document.createElement("img");
+              img.src = e.target.result;
+              previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+          }
+        } else {
+          uploadText.textContent = "Click to select up to 5 images";
+        }
+      });
+    </script>
+    <script src="./app.js"></script>
+  </body>
 </html>
+

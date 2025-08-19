@@ -3,12 +3,15 @@
   "private": true,
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js" 
+    "dev": "nodemon src/server.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@sogni-ai/sogni-client": "^3.0.0-alpha.40",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
+    "multer": "^2.0.2",
     "node-telegram-bot-api": "^0.66.0"
   },
   "devDependencies": {
