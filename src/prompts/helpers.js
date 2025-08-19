@@ -153,7 +153,7 @@ function garmentSpecification(itemText, style) {
   
   // Detailed garment specifications to prevent distortion
   const garmentSpecs = {
-    // Unisex Basics
+    // Unisex Basics D
     'baby tee': 'short cropped t-shirt that ends above the natural waistline, fitted but not skin-tight',
     'crop top': 'short top that ends above the natural waistline, showing midriff',
     'oversized tee': 't-shirt with boxy, loose fit, sleeves extending near elbows, length past waist',
