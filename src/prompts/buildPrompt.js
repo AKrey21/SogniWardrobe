@@ -1,122 +1,55 @@
-// src/prompts/buildPrompt.js
+const { STYLE_PROMPTS } = require('./constants');
+const { normalizeRace, complexionDescriptor, ethnicFeaturesFor, bmiDescriptor, statureDescriptor, garmentSpecification } = require('./helpers');
 
-const constants = require("./constants"); // Import the whole module to prevent circular dependencies
-const {
-  normalizeRace,
-  complexionDescriptor,
-  ethnicFeaturesFor,
-  bmiDescriptor,
-  statureDescriptor,
-  poseAndExpressionFor,
-  hairStyleFor,
-} = require("./helpers");
-
-// Helper function to get all style-specific details, including a RANDOM accessory
-function getStyleDetails(style) {
-  const styleData = constants.STYLE_PROMPTS[style];
-
-  // Default fallback for styles not yet fully defined in the constants
-  if (!styleData || !styleData.base || !styleData.accessories) {
-    return {
-      styleLine: style, // Use the style name itself as the base description
-      accessoryLine: "accessories that complement the outfit",
-      makeup: "Natural and appropriate for the style.",
-    };
-  }
-
-  // Randomly select one accessory from the list to ensure variety
-  const randomAccessory =
-    styleData.accessories[
-      Math.floor(Math.random() * styleData.accessories.length)
-    ];
-
-  // Define makeup specifics separately for clarity
-  const makeupSpecifics = {
-    Formal:
-      "Clean, professional makeup with a neutral palette and defined features.",
-    Streetwear: "Natural, fresh-faced makeup or a bold graphic eyeliner look.",
-    Vintage:
-      "Makeup appropriate for the era, such as a classic red lip or winged eyeliner.",
-    Techwear: "Minimal to no makeup, focusing on a clean, functional look.",
-    Grunge:
-      "Smudged eyeliner, dark lipstick, and a purposefully unpolished look.",
-    Bohemian: "Natural, sun-kissed makeup with earthy tones.",
-    Y2K: "Glossy lips, frosted eyeshadow, and playful, colorful accents.",
-    "Dark Academia":
-      "Subtle, classic makeup with an emphasis on a clean, scholarly appearance.",
-    Minimal: 'Barely-there, "no-makeup" makeup look with perfect skin.',
-  };
-
-  return {
-    styleLine: styleData.base,
-    accessoryLine: randomAccessory,
-    makeup: makeupSpecifics[style] || "Natural and appropriate for the style.",
-  };
-}
-
+/* --------------------- Enhanced prompt construction ---------------------- */
 function buildPrompt({
-  gender,
-  style,
-  itemText,
-  heightCm,
-  weightKg,
-  race,
-  complexion,
+  gender, style, itemText, heightCm, weightKg, race, complexion
 }) {
   const raceLabel = normalizeRace(race);
   const ethnicityLine = ethnicFeaturesFor(raceLabel, complexion);
   const complexionLine = complexionDescriptor(complexion, race);
   const buildLine = bmiDescriptor(heightCm, weightKg, gender);
   const statureLine = statureDescriptor(heightCm, gender);
-  const poseLine = poseAndExpressionFor(style);
-  const hairLine = hairStyleFor(gender, raceLabel);
+  const styleLine = STYLE_PROMPTS[style] || style;
 
-  // --- Get all style details from our helper function ---
-  const { styleLine, accessoryLine, makeup } = getStyleDetails(style);
+  // Enhanced framing with more specific requirements
+  const framing =
+    'MANDATORY FULL BODY SHOT: Complete head-to-toe visibility showing entire body from head to feet, all clothing items fully visible including shoes and accessories. ' +
+    'NEVER crop any part of the body - show complete figure in frame with space around edges. ' +
+    'Professional fashion photography: wide-angle 35mm lens, subject positioned 6-8 meters from camera for full body capture, vertical 3:4 composition ratio with subject taking up 60-70% of frame height. ' +
+    'Model standing straight with confident posture, facing camera, arms naturally positioned at sides, feet visible on ground.';
 
-  // 1. Define the Role, Scene, and Mood
-  const roleAndScene = `Act as a professional fashion photographer directing a photoshoot. Create an ultra-realistic, full-body fashion lookbook photograph.
-The scene is a professional indoor studio with a seamless, solid medium-grey background (#bbbbbb) to make the subject pop.`;
+  const lighting =
+    'Professional studio lighting setup: seamless white cyclorama background (#FFFFFF), soft key light from 45-degree angle, ' +
+    'fill light to eliminate harsh shadows, gentle rim lighting for depth, color temperature 5500K for natural skin tones.';
 
-  // 2. Describe the Model in Meticulous Detail
-  const modelDescription = `**The Model:** A ${String(
-    gender || "Unisex"
-  ).toLowerCase()} person of ${raceLabel} heritage.
-- **Appearance:** ${hairLine} ${makeup}
-- **Physical Build:** ${statureLine}. ${buildLine}.
-- **Facial Details:** ${ethnicityLine}. ${complexionLine}.
-- **Pose and Expression:** The model is ${poseLine}`;
+  const qualityAndRealism =
+    'Ultra-high resolution fashion photography: tack-sharp focus, accurate fabric textures and draping, ' +
+    'realistic garment fit based on specified body proportions, natural skin texture and tone accuracy.';
 
-  // 3. Specify the Clothing and Accessories with Emphasis
-  const clothingDescription = `**The Outfit:** A complete head-to-toe look in a cohesive ${style} style.
-- **Main Focus:** The absolute main focus of the outfit is (${itemText}:1.4). This item must be perfectly rendered.
-- **Styling:** The rest of the outfit should complement the main item perfectly within the ${styleLine} aesthetic.
-- **Accessories:** Styled with ${accessoryLine}.`;
-
-  // 4. Give Precise Technical Camera and Lighting Instructions
-  const technicalDetails = `**Photography Specs:**
-- **Camera & Lens:** Shot on a Sony A7 IV with a sharp 85mm f/1.4 lens.
-- **Lighting:** Three-point studio lighting. A large, diffused key light (softbox) is positioned at a 45-degree angle to the model, a fill light on the opposite side to soften shadows, and a subtle rim light from behind to create separation from the background.
-- **Aspect Ratio:** Portrait 3:4 (or 9:16) to provide vertical headroom and footroom.
-- **Composition (STRICT):** A strict full-body fashion shot in vertical orientation. The model MUST be fully inside the frame with visible head, hair, torso, arms, legs, and shoes. Do NOT crop, zoom, or cut off any body parts. There must be at least **10% empty space** above the head/hair and **10% empty space** below the shoes to prevent accidental cropping. Feet must be clearly visible touching the studio floor. Leave a slight margin on both sides so arms and bag straps are never cut off.`;
-
-  // 5. Final Quality Control and Art Direction
-  const qualityControl = `**Final Image Quality:** The final output must be an ultra-high resolution, tack-sharp, professional photograph. Ensure extreme realism in skin texture, fabric detail, and how the clothing fits the model's specified body type.`;
-
-  // 6. Append a hard negative prompt so the model never crops or zooms in
-  const negatives = `**Negative Prompt:** ${constants.NEGATIVE_PROMPT}`;
-
-  // Combine all parts into the final prompt
+  // Build the comprehensive prompt
   const promptParts = [
-    roleAndScene,
-    modelDescription,
-    clothingDescription,
-    technicalDetails,
-    qualityControl,
-    negatives,
+    `Professional fashion lookbook photograph of a ${String(gender || 'Unisex').toLowerCase()} model showcasing ${style} style clothing.`,
+    
+    // Physical characteristics - most important for accuracy
+    buildLine ? `Body type and build: ${buildLine}.` : '',
+    statureLine ? `Height and stature: ${statureLine}.` : '',
+    
+    // Ethnic and complexion details - critical for accuracy
+    `Ethnicity and heritage: ${raceLabel}. ${ethnicityLine}.`,
+    complexionLine ? `Skin tone specification: ${complexionLine}.` : '',
+    
+    // Style and clothing
+    `Fashion aesthetic: ${style} styling. ${styleLine}.`,
+    `Key garment focus: "${itemText}" as the central piece of the outfit, styled appropriately for ${style} aesthetic.`,
+    
+    // Technical requirements
+    framing,
+    lighting,
+    qualityAndRealism
   ];
 
-  return promptParts.filter(Boolean).join("\n\n"); // Use double newlines for better structure
+  return promptParts.filter(Boolean).join(' ');
 }
 
 module.exports = { buildPrompt };

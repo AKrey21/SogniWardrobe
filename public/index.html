@@ -1,598 +1,286 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sogni Wardrobe — Web</title>
-    <link rel="icon" href="data:," />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <style>
-      :root {
-        --bg: #0b0b0b;
-        --panel: #121212;
-        --muted: #9aa0a6;
-        --text: #e8eaed;
-        --brand: #6ee7ff;
-        --accent: #a78bfa;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        height: 100%;
-      }
-      body {
-        margin: 0;
-        background: radial-gradient(
-            1000px 400px at 20% -10%,
-            rgba(167, 139, 250, 0.15),
-            transparent
-          ),
-          radial-gradient(
-            800px 400px at 120% 20%,
-            rgba(110, 231, 255, 0.15),
-            transparent
-          ),
-          var(--bg);
-        color: var(--text);
-        font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Inter,
-          "Noto Sans", Arial, sans-serif;
-      }
-      header {
-        padding: 24px 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        max-width: 1050px;
-        margin: 0 auto;
-      }
-      header h1 {
-        margin: 0;
-        font-size: clamp(18px, 3vw, 28px);
-        letter-spacing: 0.3px;
-      }
-      header .beta {
-        font-size: 12px;
-        color: var(--muted);
-        background: #222;
-        padding: 4px 8px;
-        border-radius: 999rem;
-        border: 1px solid #333;
-      }
-      main {
-        max-width: 1050px;
-        margin: 0 auto;
-        padding: 8px 20px 40px;
-      }
-      .card {
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.05),
-          rgba(255, 255, 255, 0.02)
-        );
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 18px;
-        padding: 18px;
-        backdrop-filter: blur(8px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-      }
-      .grid {
-        display: grid;
-        gap: 16px;
-        grid-template-columns: 1fr;
-      }
-      @media (min-width: 760px) {
-        .grid {
-          grid-template-columns: 380px 1fr;
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sogni Wardrobe — Web</title>
+  <link rel="icon" href="data:," />
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { brand: '#22d3ee', accent: '#a78bfa' }
         }
       }
-      label {
-        display: block;
-        margin-bottom: 6px;
-        color: var(--muted);
-        font-size: 13px;
-      }
-      select,
-      input[type="text"],
-      input[type="number"],
-      button {
-        width: 100%;
-        padding: 12px 14px;
-        border-radius: 12px;
-        border: 1px solid #2a2a2a;
-        background: #0f0f0f;
-        color: #e8eaed;
-      }
-      button {
-        cursor: pointer;
-        font-weight: 600;
-        letter-spacing: 0.2px;
-      }
-      .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .row3 {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 10px;
-      }
-      .muted {
-        color: var(--muted);
-        font-size: 13px;
-      }
-      .actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
-      .actions button.primary {
-        background: linear-gradient(90deg, var(--brand), var(--accent));
-        border: 0;
-      }
-      .actions button.secondary {
-        background: #141414;
-      }
-      .images {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 12px;
-      }
-      .images img {
-        width: 100%;
-        height: 360px;
-        object-fit: cover;
-        border-radius: 16px;
-        border: 1px solid #2f2f2f;
-        background: #111;
-      }
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        border: 1px solid #2a2a2a;
-        padding: 6px 10px;
-        border-radius: 999rem;
-        font-size: 12px;
-        background: #0f0f0f;
-      }
-      .hidden {
-        display: none !important;
-      }
-      .spinner {
-        width: 22px;
-        height: 22px;
-        border: 3px solid #2a2a2a;
-        border-top-color: #8ab4f8;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(1turn);
-        }
-      }
-      footer {
-        max-width: 1050px;
-        margin: 32px auto;
-        padding: 0 20px 32px;
-        color: var(--muted);
-        font-size: 13px;
-      }
-      footer a {
-        color: var(--brand);
-        text-decoration: none;
-      }
-      .err {
-        color: #ffb4b4;
-      }
-      .input-mode-toggle {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 14px;
-        border: 1px solid #2a2a2a;
-        border-radius: 12px;
-        padding: 6px;
-        background: #0f0f0f;
-      }
-      .input-mode-toggle label {
-        flex: 1;
-        text-align: center;
-        margin: 0;
-        padding: 8px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        font-size: 14px;
-        color: var(--muted);
-      }
-      .input-mode-toggle input[type="radio"] {
-        display: none;
-      }
-      .input-mode-toggle input[type="radio"]:checked + label {
-        background-color: #222;
-        color: var(--text);
-        font-weight: 600;
-      }
-      .upload-area {
-        border: 2px dashed #2a2a2a;
-        border-radius: 12px;
-        padding: 16px;
-        text-align: center;
-        cursor: pointer;
-        transition: background-color 0.2s, border-color 0.2s;
-      }
-      .upload-area:hover {
-        background-color: #1a1a1a;
-        border-color: #444;
-      }
-      #image-upload {
-        display: none;
-      }
-      #image-preview-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: center;
-        margin-top: 10px;
-      }
-      #image-preview-container img {
-        display: block;
-        max-width: 80px;
-        max-height: 80px;
-        border-radius: 8px;
-        border: 1px solid #2f2f2f;
-        object-fit: cover;
-      }
-      #items-checklist {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        background: #0f0f0f;
-        border: 1px solid #2a2a2a;
-        border-radius: 12px;
-        padding: 12px;
-      }
-      .checklist-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .checklist-item input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        accent-color: var(--accent);
-        flex-shrink: 0;
-      }
-      .checklist-item input[type="text"] {
-        width: 100%;
-        padding: 6px 8px;
-        font-size: 15px;
-        background-color: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 6px;
-      }
-      .checklist-item label {
-        display: none;
-      }
-      .preview-item {
-        position: relative;
-        display: inline-block;
-      }
-      .preview-item .delete-btn {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        width: 20px;
-        height: 20px;
-        background-color: rgba(0, 0, 0, 0.7);
-        color: white;
-        border: 1px solid white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
-      .preview-item .delete-btn:hover {
-        background-color: #ff4d4d;
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>Sogni Wardrobe <span class="beta">web beta</span></h1>
-      <div class="badge">stylist demo</div>
-    </header>
+    }
+  </script>
+</head>
 
-    <main class="grid">
-      <section class="card">
-        <div style="display: grid; gap: 14px">
-          <div>
-            <label>1. Choose Your Input Method</label>
-            <div class="input-mode-toggle">
-              <input
-                type="radio"
-                id="mode-text"
-                name="input_mode"
-                value="text"
-                checked
-              />
-              <label for="mode-text">Describe Item</label>
-              <input
-                type="radio"
-                id="mode-image"
-                name="input_mode"
-                value="image"
-              />
-              <label for="mode-image">Upload Photos</label>
-            </div>
-          </div>
+<body class="min-h-screen text-neutral-100 selection:bg-brand/30 selection:text-black"
+  style="background:
+    radial-gradient(1000px 400px at 20% -10%, rgba(167,139,250,.15), transparent),
+    radial-gradient(800px 400px at 120% 20%, rgba(110,231,255,.15), transparent),
+    #0b0b0b;">
 
-          <div id="text-input-container">
-            <label for="item">Item to style</label>
-            <input
-              id="item"
-              type="text"
-              placeholder='e.g., "dark low-rise jeans"'
-            />
-          </div>
+  <!-- Header -->
+  <header class="max-w-5xl mx-auto px-5 py-6 flex items-center justify-between">
+    <h1 class="m-0 text-[clamp(18px,3vw,28px)] tracking-wide font-semibold">
+      Sogni Wardrobe
+      <span class="ml-2 text-xs text-neutral-400 bg-neutral-800/80 px-2.5 py-1 rounded-full ring-1 ring-white/10">web beta</span>
+    </h1>
+    <div class="inline-flex items-center gap-2 text-xs ring-1 ring-white/10 px-3 py-1.5 rounded-full bg-neutral-900/70">
+      stylist demo
+    </div>
+  </header>
 
-          <div id="image-input-container" class="hidden">
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              "
-            >
-              <label for="image-upload">Upload photos of your items</label>
-              <button
-                id="clear-images-btn"
-                style="
-                  width: auto;
-                  padding: 4px 10px;
-                  font-size: 12px;
-                  background: #333;
-                "
-              >
-                Clear All
-              </button>
-            </div>
-            <label for="image-upload" class="upload-area">
-              <span id="upload-text">Click to add up to 5 images</span>
-              <div id="image-preview-container"></div>
+  <!-- Main -->
+  <main class="max-w-5xl mx-auto px-5 pb-10 grid gap-4 md:grid-cols-[380px_1fr]">
+    <!-- Controls -->
+    <section class="bg-white/[.03] ring-1 ring-white/10 rounded-2xl p-4 md:p-5 backdrop-blur shadow-[0_10px_30px_rgba(0,0,0,.35)]">
+      <div class="grid gap-4">
+
+        <!-- 1. Input mode toggle -->
+        <div>
+          <label class="block mb-1.5 text-sm text-neutral-400">1. Choose Your Input Method</label>
+          <div class="grid grid-cols-2 gap-2 p-1 rounded-xl ring-1 ring-neutral-800 bg-neutral-950">
+            <input id="mode-text" name="input_mode" type="radio" class="peer/mtext hidden" checked>
+            <label for="mode-text"
+                   class="text-center px-3 py-2 rounded-lg cursor-pointer text-sm text-neutral-400
+                          peer-checked/mtext:bg-neutral-800 peer-checked/mtext:text-neutral-100">
+              Describe Item
             </label>
-            <input type="file" id="image-upload" accept="image/*" multiple />
+
+            <input id="mode-image" name="input_mode" type="radio" class="peer/mimg hidden">
+            <label for="mode-image"
+                   class="text-center px-3 py-2 rounded-lg cursor-pointer text-sm text-neutral-400
+                          peer-checked/mimg:bg-neutral-800 peer-checked/mimg:text-neutral-100">
+              Upload Photos
+            </label>
+          </div>
+        </div>
+
+        <!-- Text mode -->
+        <div id="text-input-container" class="grid gap-3">
+          <label for="item" class="block text-sm text-neutral-400">Item to style</label>
+          <input id="item" type="text" placeholder='e.g., "dark low-rise jeans"'
+                 class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 placeholder:text-neutral-500 focus:outline-none focus:ring-brand/60" />
+        </div>
+
+        <!-- Image mode -->
+        <div id="image-input-container" class="hidden grid gap-3">
+          <div class="flex items-center justify-between">
+            <label for="image-upload" class="block text-sm text-neutral-400">Upload photos of your items</label>
+            <button id="clear-images-btn"
+                    class="px-2.5 py-1 rounded-lg bg-neutral-800 ring-1 ring-neutral-700 text-xs">
+              Clear All
+            </button>
           </div>
 
-          <div>
-            <label>2. Describe yourself & the desired style</label>
-            <div class="row3">
-              <div>
-                <label for="gender">Gender</label
-                ><select id="gender">
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Unisex</option>
-                </select>
-              </div>
-              <div>
-                <label for="race">Race (SG)</label
-                ><select id="race">
-                  <option>Chinese</option>
-                  <option>Malay</option>
-                  <option>Indian</option>
-                  <option>Eurasian</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div>
-                <label for="complexion">Complexion</label
-                ><select id="complexion">
-                  <option>Fair</option>
-                  <option>Light-medium</option>
-                  <option>Medium</option>
-                  <option>Tan</option>
-                  <option>Deep</option>
-                </select>
-              </div>
-            </div>
-          </div>
+          <!-- Clickable upload area -->
+          <label for="image-upload"
+                 class="w-full border-2 border-dashed border-neutral-800 rounded-xl p-4 text-center cursor-pointer
+                        hover:bg-neutral-900/40 hover:border-neutral-600 transition">
+            <span id="upload-text" class="text-sm text-neutral-400">Click to add up to 5 images</span>
+            <div id="image-preview-container" class="mt-2 flex flex-wrap gap-2 justify-center"></div>
+          </label>
+          <input type="file" id="image-upload" accept="image/*" multiple class="hidden" />
+        </div>
 
-          <div class="row">
+        <!-- 2. Persona + style -->
+        <div>
+          <label class="block mb-1.5 text-sm text-neutral-400">2. Describe yourself & the desired style</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label for="height">Height (cm)</label
-              ><input
-                id="height"
-                type="number"
-                min="140"
-                max="210"
-                placeholder="e.g., 165"
-              />
-            </div>
-            <div>
-              <label for="weight">Weight (kg)</label
-              ><input
-                id="weight"
-                type="number"
-                min="35"
-                max="160"
-                placeholder="e.g., 60"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label for="style">Style</label>
-            <select id="style">
-              <option>Formal</option>
-              <option>Casual</option>
-              <option>Smart Casual</option>
-              <option>Business Casual</option>
-              <option>Streetwear</option>
-              <option>Preppy</option>
-              <option>Minimal</option>
-              <option>Vintage</option>
-              <option>Workwear</option>
-              <option>Techwear</option>
-              <option>Grunge</option>
-              <option>Skater</option>
-              <option>Bohemian</option>
-              <option>Festival</option>
-              <option>Y2K</option>
-              <option>Cottagecore</option>
-              <option>Dark Academia</option>
-              <option>Gorpcore</option>
-            </select>
-          </div>
-
-          <div id="items-checklist-container" class="hidden">
-            <label
-              >3. Edit item names if needed, then select items to include</label
-            >
-            <div id="items-checklist"></div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label for="batch">Photos per run</label>
-              <select id="batch">
-                <option>1</option>
-                <option selected>3</option>
-                <option>4</option>
-                <option>6</option>
+              <label for="gender" class="block mb-1.5 text-sm text-neutral-400">Gender</label>
+              <select id="gender" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
+                <option>Male</option><option>Female</option><option>Unisex</option>
               </select>
             </div>
             <div>
-              <label>&nbsp;</label>
-              <div class="muted">Uses Sogni’s <code>spark</code> tokens.</div>
+              <label for="race" class="block mb-1.5 text-sm text-neutral-400">Race (SG)</label>
+              <select id="race" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
+                <option>Chinese</option><option>Malay</option><option>Indian</option><option>Eurasian</option><option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="complexion" class="block mb-1.5 text-sm text-neutral-400">Complexion</label>
+              <select id="complexion" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
+                <option>Fair</option><option>Light-medium</option><option>Medium</option><option>Tan</option><option>Deep</option>
+              </select>
             </div>
           </div>
+        </div>
 
-          <div class="actions">
-            <button id="go" class="primary">Generate</button>
-            <button id="regen" class="secondary">Regenerate</button>
-            <div id="loading" class="spinner hidden" aria-label="Loading"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="height" class="block mb-1.5 text-sm text-neutral-400">Height (cm)</label>
+            <input id="height" type="number" min="140" max="210" placeholder="e.g., 165"
+                   class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 placeholder:text-neutral-500 focus:outline-none focus:ring-brand/60" />
           </div>
-          <div id="status" class="muted"></div>
+          <div>
+            <label for="weight" class="block mb-1.5 text-sm text-neutral-400">Weight (kg)</label>
+            <input id="weight" type="number" min="35" max="160" placeholder="e.g., 60"
+                   class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 placeholder:text-neutral-500 focus:outline-none focus:ring-brand/60" />
+          </div>
         </div>
-      </section>
 
-      <section class="card">
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-          "
-        >
-          <div class="muted">Results</div>
+        <div>
+          <label for="style" class="block mb-1.5 text-sm text-neutral-400">Style</label>
+          <select id="style" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
+            <option>Formal</option><option>Casual</option><option>Smart Casual</option><option>Business Casual</option>
+            <option>Streetwear</option><option>Preppy</option><option>Minimal</option><option>Vintage</option>
+            <option>Workwear</option><option>Techwear</option><option>Grunge</option><option>Skater</option>
+            <option>Bohemian</option><option>Festival</option><option>Y2K</option><option>Cottagecore</option>
+            <option>Dark Academia</option><option>Gorpcore</option>
+          </select>
         </div>
-        <div id="images" class="images"></div>
-      </section>
-    </main>
 
-    <footer>
-      <p>
-        Tip: You can either describe an item or upload one or more photos of
-        your items for the AI to analyze.
-      </p>
-      <p>Built for NTU x Base hackathon demo.</p>
-    </footer>
+        <!-- 3. Items checklist (shown after analyze) -->
+        <div id="items-checklist-container" class="hidden">
+          <label class="block mb-1.5 text-sm text-neutral-400">3. Edit item names if needed, then select items to include</label>
+          <div id="items-checklist" class="flex flex-col gap-2 rounded-xl bg-neutral-950 ring-1 ring-neutral-800 p-3"></div>
+        </div>
 
-    <script>
-      window.stagedFiles = [];
+        <!-- Photos per run -->
+        <div class="grid gap-2 lg:grid-cols-[auto,1fr] lg:items-end">
+          <div>
+            <label for="batch" class="block mb-1.5 text-sm text-neutral-400">Photos per run</label>
+            <select id="batch" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
+              <option>1</option><option selected>3</option><option>4</option><option>6</option>
+            </select>
+          </div>
+          <p class="text-xs text-neutral-400 leading-snug lg:pl-2">
+            Uses Sogni’s <span class="font-mono text-neutral-300">spark</span> tokens.
+          </p>
+        </div>
 
-      const imageUploadInput = document.getElementById("image-upload");
-      const previewContainer = document.getElementById(
-        "image-preview-container"
+        <!-- Actions -->
+        <div class="flex items-center gap-2">
+          <button id="go"
+            class="px-4 py-2 rounded-xl font-medium bg-brand text-black transition disabled:opacity-50 disabled:cursor-not-allowed">
+            Generate
+          </button>
+          <button id="regen"
+            class="px-4 py-2 rounded-xl font-medium bg-neutral-800 text-neutral-200 ring-1 ring-neutral-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            Regenerate
+          </button>
+          <div id="loading"
+            class="hidden ml-1.5 h-5 w-5 rounded-full border-2 border-neutral-600 border-t-transparent animate-spin"
+            aria-label="Loading"></div>
+        </div>
+
+        <p id="status" class="text-sm text-neutral-400"></p>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="bg-white/[.03] ring-1 ring-white/10 rounded-2xl p-4 md:p-5 backdrop-blur shadow-[0_10px_30px_rgba(0,0,0,.35)]">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm text-neutral-400">Results</div>
+      </div>
+      <div id="images" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 items-start"></div>
+    </section>
+  </main>
+
+  <!-- Wardrobe -->
+  <section class="max-w-5xl mx-auto px-5 mt-4">
+    <div class="bg-white/[.03] ring-1 ring-white/10 rounded-2xl p-4 md:p-5 backdrop-blur shadow-[0_10px_30px_rgba(0,0,0,.35)]">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm text-neutral-400">Wardrobe (Saved)</div>
+        <div class="flex items-center gap-2">
+          <button id="view-wardrobe" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-800 ring-1 ring-neutral-700">View all</button>
+          <button id="clear-wardrobe" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-800 ring-1 ring-neutral-700">Clear all</button>
+        </div>
+      </div>
+      <div id="wardrobe-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 items-start"></div>
+    </div>
+  </section>
+
+  <!-- Upload preview helpers -->
+  <script>
+    window.stagedFiles = [];
+    const imageUploadInput = document.getElementById('image-upload');
+    const previewContainer = document.getElementById('image-preview-container');
+    const uploadText = document.getElementById('upload-text');
+    const clearImagesBtn = document.getElementById('clear-images-btn');
+
+    function isDuplicate(file) {
+      return window.stagedFiles.some(f =>
+        f.name === file.name && f.size === file.size && f.lastModified === file.lastModified
       );
-      const uploadText = document.getElementById("upload-text");
-      const clearImagesBtn = document.getElementById("clear-images-btn");
+    }
 
-      function isDuplicate(file) {
-        return window.stagedFiles.some(
-          (existingFile) =>
-            existingFile.name === file.name &&
-            existingFile.size === file.size &&
-            existingFile.lastModified === file.lastModified
-        );
-      }
-
-      function renderPreviews() {
-        previewContainer.innerHTML = "";
-        if (window.stagedFiles.length > 0) {
-          uploadText.textContent = `${window.stagedFiles.length} image(s) selected`;
-          window.stagedFiles.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const previewWrapper = document.createElement("div");
-              previewWrapper.className = "preview-item";
-
-              const img = document.createElement("img");
-              img.src = e.target.result;
-
-              const deleteBtn = document.createElement("span");
-              deleteBtn.className = "delete-btn";
-              deleteBtn.innerHTML = "&times;";
-              deleteBtn.dataset.index = index;
-
-              deleteBtn.addEventListener("click", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                const indexToRemove = parseInt(event.target.dataset.index, 10);
-                window.stagedFiles.splice(indexToRemove, 1);
-                renderPreviews();
-              });
-
-              previewWrapper.appendChild(img);
-              previewWrapper.appendChild(deleteBtn);
-              previewContainer.appendChild(previewWrapper);
-            };
-            reader.readAsDataURL(file);
-          });
-        } else {
-          uploadText.textContent = "Click to add up to 5 images";
-        }
-      }
-
-      imageUploadInput.addEventListener("change", (event) => {
-        const newFiles = Array.from(event.target.files);
-
-        newFiles.forEach((file) => {
-          if (!isDuplicate(file)) {
-            window.stagedFiles.push(file);
-          } else {
-            console.log(`Duplicate file ignored: ${file.name}`);
-          }
+    function renderPreviews() {
+      previewContainer.innerHTML = '';
+      if (window.stagedFiles.length > 0) {
+        uploadText.textContent = `${window.stagedFiles.length} image(s) selected`;
+        window.stagedFiles.forEach((file, index) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'relative inline-block';
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'max-w-20 max-h-20 rounded-lg ring-1 ring-neutral-700 object-cover';
+            const del = document.createElement('span');
+            del.className = 'absolute -top-1 -right-1 w-5 h-5 bg-black/70 text-white border border-white rounded-full flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-red-500';
+            del.innerHTML = '&times;';
+            del.dataset.index = index;
+            del.addEventListener('click', (ev) => {
+              ev.preventDefault(); ev.stopPropagation();
+              const i = parseInt(ev.target.dataset.index, 10);
+              window.stagedFiles.splice(i, 1);
+              renderPreviews();
+            });
+            wrap.appendChild(img); wrap.appendChild(del);
+            previewContainer.appendChild(wrap);
+          };
+          reader.readAsDataURL(file);
         });
+      } else {
+        uploadText.textContent = 'Click to add up to 5 images';
+      }
+    }
 
-        if (window.stagedFiles.length > 5) {
-          alert(
-            "You can upload a maximum of 5 images. The extras have been removed."
-          );
-          window.stagedFiles = window.stagedFiles.slice(0, 5);
-        }
+    imageUploadInput?.addEventListener('change', (event) => {
+      const newFiles = Array.from(event.target.files);
+      newFiles.forEach((file) => { if (!isDuplicate(file)) window.stagedFiles.push(file); });
+      if (window.stagedFiles.length > 5) {
+        alert('You can upload a maximum of 5 images. The extras have been removed.');
+        window.stagedFiles = window.stagedFiles.slice(0, 5);
+      }
+      renderPreviews();
+      imageUploadInput.value = '';
+    });
 
-        renderPreviews();
-        imageUploadInput.value = "";
-      });
+    clearImagesBtn?.addEventListener('click', () => {
+      window.stagedFiles = [];
+      renderPreviews();
+      document.dispatchEvent(new Event('clear'));
+    });
+  </script>
 
-      clearImagesBtn.addEventListener("click", () => {
-        window.stagedFiles = [];
-        renderPreviews();
-
-        const resetEvent = new Event("clear");
-        document.dispatchEvent(resetEvent);
-      });
-    </script>
-    <script src="./app.js"></script>
-  </body>
+  <!-- Scripts -->
+  <script src="./app.js"></script>
+  <script src="./wardrobe.js"></script>
+  <script>
+    // Boot Wardrobe grid & buttons
+    Wardrobe.mountGrid(document.getElementById('wardrobe-grid'));
+    document.getElementById('clear-wardrobe')?.addEventListener('click', () => {
+      Wardrobe.getAll().forEach(url => Wardrobe.remove(url));
+    });
+    // View all (if provided by wardrobe.js slideshow, else it will no-op)
+    document.getElementById('view-wardrobe')?.addEventListener('click', () => {
+      if (Wardrobe.viewAll) Wardrobe.viewAll();
+      else {
+        const urls = Wardrobe.getAll();
+        if (urls.length === 0) alert('No saved looks yet.');
+        else window.Lightbox?.open(urls[0]);
+      }
+    });
+  </script>
+</body>
 </html>
