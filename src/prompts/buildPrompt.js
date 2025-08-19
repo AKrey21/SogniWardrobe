@@ -14,9 +14,10 @@ function buildPrompt({
 
   // Enhanced framing with more specific requirements
   const framing =
-    'MANDATORY: Full-body fashion lookbook shot — complete head-to-toe visibility, all clothing items fully visible including shoes. ' +
-    'Professional fashion photography: 85mm lens, subject positioned 4-5 meters from camera, vertical 3:4 composition ratio. ' +
-    'Model standing straight with confident posture, facing camera, arms naturally positioned.';
+    'MANDATORY FULL BODY SHOT: Complete head-to-toe visibility showing entire body from head to feet, all clothing items fully visible including shoes and accessories. ' +
+    'NEVER crop any part of the body - show complete figure in frame with space around edges. ' +
+    'Professional fashion photography: wide-angle 35mm lens, subject positioned 6-8 meters from camera for full body capture, vertical 3:4 composition ratio with subject taking up 60-70% of frame height. ' +
+    'Model standing straight with confident posture, facing camera, arms naturally positioned at sides, feet visible on ground.';
 
   const lighting =
     'Professional studio lighting setup: seamless white cyclorama background (#FFFFFF), soft key light from 45-degree angle, ' +
