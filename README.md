@@ -1,182 +1,218 @@
-# Sogni Wardrobe — Telegram Bot
+# Sogni Wardrobe — Web App
 
-Generate outfit lookbook images from short prompts in Telegram using the **Sogni** SDK.
-
-- Pick **Gender** → pick **Style** → type an **Item** (e.g. “baby tee”)
-- Bot returns a small album of images, plus quick actions to **Regenerate**, **Change Style**, or **Restart**
-- Includes a simple `GET /heartbeat` (Express) for uptime pings
-
-> **Heads‑up:** keep your `.env` **out of version control** and rotate any secrets that were ever shared.
+A tiny web app that generates lookbook-style outfit images using the Sogni SDK.  
+Frontend (your site) lives in `public/`. Backend (API + prompts + Sogni client) lives in `src/`.
 
 ---
 
-## Features
-
-- Telegram flow with inline keyboards (gender/style) and text input for the item
-- Sends images as a single **media group** (album)
-- Shortcuts: `!imagine <item>` and `!repeat`
-- Minimal express server with `/heartbeat`
-- Uses `@sogni-ai/sogni-client` for image generation
-
----
-
-## Requirements
-
-- **Node.js 18+**
-- A **Telegram bot token**
-- Sogni credentials (see Configuration)
+## ✨ Features
+- Simple **frontend** (`public/index.html` + `public/app.js`) to collect user inputs and show results
+- Clean **backend split**:
+  - `/api/generate` endpoint (Express)
+  - Prompt-building isolated under `src/prompts/`
+  - Sogni SDK connection & image generation in `src/sogni/`
+- Healthcheck: `GET /heartbeat`
 
 ---
 
-## Quick start
+## 🗂️ Project Structure
 
-```bash
-# 1) Install deps
-npm install
-
-# 2) Create your .env (see .env example below)
-cp .env.example .env
-# then fill in your values
-
-# 3) Run
-npm run dev   # with nodemon (auto-reload)
-# or
-npm start     # plain node
+```
+project-root/
+├─ public/
+│  ├─ index.html          # The main page of your site (serves the UI)
+│  └─ app.js              # Frontend JS: handles form, calls /api/generate, renders images
+├─ src/
+│  ├─ server.js           # Express server entrypoint; serves /public and mounts API routes
+│  ├─ routes/
+│  │  └─ generate.js      # POST /api/generate — validates input, builds prompts, calls Sogni
+│  ├─ sogni/
+│  │  └─ client.js        # Sogni SDK bootstrapping & image generation helper
+│  └─ prompts/
+│     ├─ constants.js     # Enums/lists (styles, genders…) + base negative prompt, style prompts
+│     ├─ helpers.js       # Small functions (race/complexion text, BMI/stature descriptors, garment specs)
+│     └─ buildPrompt.js   # Builds positive/negative prompts from request data
+├─ .env                   # Environment variables (not committed)
+├─ package.json           # NPM scripts & deps (start/dev)
+└─ package-lock.json
 ```
 
-> Production tip: use `npm ci --only=production` on servers for deterministic, slim installs.
+> If you still have legacy files (like `webServer.js`), they can be deleted once the split is working.
 
 ---
 
-## Configuration
+## 📄 What each file does
 
-Create a `.env` in the project root. Example:
+### Frontend (`public/`)
+- **`public/index.html`**
+  - The HTML shell of the app (form inputs, dropdowns, results area).
+  - Loads `public/app.js` and any CSS assets you add.
+  - Served at `GET /` by Express.
 
-```ini
-# Telegram
-TELEGRAM_BOT_TOKEN=123456789:YOUR_TELEGRAM_BOT_TOKEN
+- **`public/app.js`**
+  - Listens to your form submit / button clicks.
+  - Gathers inputs (gender, style, garment item, height/weight, race, complexion, batch size).
+  - Calls the backend: `fetch('/api/generate', { method: 'POST', body: JSON.stringify({...}) })`.
+  - Renders generated images and displays the prompts/metadata if you choose.
 
-# Sogni (example vars — align with how you provision credentials)
-APP_ID=your-sogni-app-or-project-id
-SOGNI_USERNAME=your-sogni-username
-SOGNI_PASSWORD=your-sogni-password
+### Backend (`src/`)
+- **`src/server.js`**
+  - Loads environment variables (`dotenv`).
+  - Sets up Express, JSON parsing, and serves static files from `public/`.
+  - Exposes `GET /heartbeat` and mounts the generate route at `POST /api/generate`.
+  - Connects to Sogni on startup (via `connectSogni()` from `sogni/client.js`).
 
-# (Optional) Tuning knobs — defaults shown reflect the current code
-# Model used by Sogni
+- **`src/routes/generate.js`**
+  - Validates request body:
+    - `gender` (Male | Female | Unisex)
+    - `style` (Formal | Casual | Techwear | …)
+    - `itemText` (e.g., "baby tee", "cargo pants")
+    - optional: `heightCm`, `weightKg`, `race`, `complexion`, `batch`
+  - Builds `positivePrompt` and `negativePrompt` using `prompts/buildPrompt.js`.
+  - Calls Sogni to generate images and returns the image array + metadata.
+  - Handles common Sogni/validation errors and returns user-friendly messages.
+
+- **`src/sogni/client.js`**
+  - Creates a Sogni client instance using your endpoints + credentials.
+  - Exposes:
+    - `connectSogni()` — called once on server start.
+    - `generateImages({...})` — creates a generation project and waits for images.
+
+- **`src/prompts/constants.js`**
+  - Lists for `GENDERS`, `STYLES`, `COMPLEXIONS`.
+  - `RACE_LABELS` adapted for Singapore context.
+  - `NEGATIVE_BASE` (base safety/quality negatives to avoid artifacts).
+  - `STYLE_PROMPTS` (micro-guidance per style).
+
+- **`src/prompts/helpers.js`**
+  - `normalizeRace()` → maps input to a concise label.
+  - `ethnicFeaturesFor()` → brief, respectful descriptors.
+  - `complexionDescriptor()` → consistent skin-tone phrasing (Fitzpatrick I–VI hints).
+  - `bmiDescriptor()` / `statureDescriptor()` → soft body/stature hints (optional).
+  - `garmentSpecification()` → detail garment fit/structure if the item is recognized.
+
+- **`src/prompts/buildPrompt.js`**
+  - `buildPositivePrompt()` → stitches together body type, style, garment, lighting, framing.
+  - `buildNegativePrompt()` → discourages wrong scenes, cropped limbs, mismatched styles, etc.
+
+---
+
+## 🔧 Getting Started
+
+### 1) Install dependencies
+```bash
+npm install
+```
+
+### 2) Create `.env`
+Create a `.env` at the project root with your values:
+```
+PORT=3000
+APP_ID=your_app_id
+REST_ENDPOINT=https://socket.sogni.ai/api/v1
+SOCKET_ENDPOINT=wss://socket.sogni.ai
+SOGNI_USERNAME=your_username
+SOGNI_PASSWORD=your_password
 SOGNI_MODEL_ID=flux1-schnell-fp8
-
-# Sampler steps (quality vs. speed/cost)
-SOGNI_STEPS=6
-
-# Image size (width x height)
+SOGNI_STEPS=12
 SOGNI_WIDTH=768
-SOGNI_HEIGHT=1024
-
-# Images per prompt (if your code uses this env;
-# otherwise edit DEFAULT_BATCH in telegramBot.js)
-# SOGNI_BATCH=3
+SOGNI_HEIGHT=1152
+SOGNI_BATCH=3
 ```
 
-> **Note:** In the current codebase, the batch size is defined as `DEFAULT_BATCH` in `telegramBot.js`. You can either change that constant (recommended to **3** for lower usage) or update the code to read `SOGNI_BATCH` from the environment.
-
----
-
-## Scripts
-
-- `npm run dev` — start with **nodemon**
-- `npm start` — start with **node**
-
-Express exposes `GET /heartbeat` for uptime checks.
-
----
-
-## Usage (Telegram)
-
-1. **/start** — choose **Gender** then **Style**  
-2. Type the **Item**, e.g. `baby tee`, `linen blazer`, `pleated skirt`
-3. Receive an album of outfit images with action buttons:
-   - 🔁 **Regenerate**
-   - 🎛 **Change Style**
-   - 🔄 **Restart**
-
-**Shortcuts**
-- `!imagine <item>` — quick generate using your last chosen gender/style
-- `!repeat` — rerun your last item
-
----
-
-## Reduce token / image usage (light mode)
-
-If you want lighter defaults, tweak these values:
-
-- **Batch**: `DEFAULT_BATCH = 3` (or set `SOGNI_BATCH=3` if your code supports it)
-- **Steps**: `SOGNI_STEPS=4`
-- **Size**: `SOGNI_WIDTH=640`, `SOGNI_HEIGHT=896`
-
-These cut cost/time significantly with minimal visual impact.
-
----
-
-## Project structure
-
-```
-.
-├─ index.js           # Sogni client bootstrap + Express heartbeat + start Telegram bot
-├─ telegramBot.js     # Bot logic, keyboards, generation + sending albums
-├─ package.json
-├─ .env               # Secrets (DO NOT COMMIT)
-└─ .gitignore
-```
-
----
-
-## Dependencies
-
-Only the following are required by the current code:
-
-- `@sogni-ai/sogni-client`
-- `node-telegram-bot-api`
-- `express`
-- `dotenv`
-- (dev) `nodemon`
-
-If you have extras like `axios`, `discord.js`, `jimp`, `replace-color`, or `sharp` but you’re not using them, you can remove them:
-
+### 3) Run
+- Development (auto-reload):
 ```bash
-npm remove axios discord.js jimp replace-color sharp
-npm install
-npm prune
-npm dedupe
+npm run dev
+```
+- Production-style:
+```bash
+npm start
 ```
 
-Commit the updated `package.json` and `package-lock.json` afterwards.
+Open http://localhost:${PORT}  (defaults to 3000).
 
 ---
 
-## Troubleshooting
+## 🧪 API — `POST /api/generate`
 
-- **“Project not found” / “WebSocket not connected”**  
-  Ensure Sogni credentials are valid and your `APP_ID` exists. If the client crashes on init errors, let your process manager (e.g. PM2) restart it.
+**Body (JSON):**
+```json
+{
+  "gender": "Female",
+  "style": "Y2K",
+  "itemText": "baby tee",
+  "batch": 3,
+  "heightCm": 165,
+  "weightKg": 55,
+  "race": "Chinese",
+  "complexion": "Light-medium"
+}
+```
 
-- **“Insufficient funds”**  
-  Top up your Sogni balance or reduce usage (batch/size/steps).
+**Success response:**
+```json
+{
+  "images": [
+    {"url": "...", "id": "..."},
+    {"url": "...", "id": "..."}
+  ],
+  "meta": {
+    "positivePrompt": "…",
+    "negativePrompt": "…",
+    "gender": "Female",
+    "style": "Y2K",
+    "itemText": "baby tee",
+    "batch": 3,
+    "heightCm": 165,
+    "weightKg": 55,
+    "race": "Chinese",
+    "complexion": "Light-medium",
+    "modelParams": { "model": "flux1-schnell-fp8", "steps": 12, "guidance": 1.5, "width": 768, "height": 1152 }
+  }
+}
+```
 
-- **Bot not responding in group threads**  
-  Make sure the bot has permission and you’re replying inside the correct **topic** (message thread).
-
-- **Images don’t appear**  
-  Some prompts may hit safety filters. Try neutral rewording and simpler items.
+**Common errors:**
+- `400` — invalid input (e.g., style string not in allowed list)
+- `401` — Sogni auth error
+- `402` — Insufficient Sogni credits
+- `422` — Sogni generated no images (try adjusting prompts)
+- `503` — Sogni not connected (server startup/connection issue)
+- `500` — Unhandled server error
 
 ---
 
-## Security
+## 🧩 Troubleshooting
 
-- Never commit `.env`
-- Rotate tokens/passwords if they were shared or leaked
-- Store secrets in your hosting provider’s secret manager in production
+- **`Error: Cannot find module './sogni/client'`**
+  - Ensure `src/sogni/client.js` exists and the import path in `src/server.js` is `require('./sogni/client')`.
+
+- **Images not appearing on the page**
+  - Open DevTools → Network → check `POST /api/generate`.
+  - If it returns errors, see “Common errors” above.
+
+- **CORS issues**
+  - The frontend is served by the same Express app (same origin), so CORS is not needed. If you serve the frontend elsewhere, add CORS middleware to `src/server.js` and allow your origin.
+
+- **Vercel/Serverless**
+  - This app maintains a long-lived connection to Sogni. Prefer a persistent Node host (Render, Fly.io, Railway, Heroku, a VM, etc.).
 
 ---
 
-## License
+## 📦 NPM Scripts
 
-Proprietary — for your team’s internal use. Add a license if you plan to open‑source.
+- `npm run dev` — start server with nodemon (hot reload)
+- `npm start` — start server with Node
+
+---
+
+## 📜 Notes
+
+- You can tweak the tone/strength of prompts inside `src/prompts/` without touching route logic.
+- New garment types? Add entries to `garmentSpecification()` in `helpers.js`.
+- New styles? Add to `STYLES` and `STYLE_PROMPTS` in `constants.js`.
+
+---
+
+Happy building!
