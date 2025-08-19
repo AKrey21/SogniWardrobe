@@ -107,13 +107,9 @@ npm install
 ### 2) Create `.env`
 Create a `.env` at the project root with your values:
 ```
-PORT=3000
 APP_ID=your_app_id
-REST_ENDPOINT=https://socket.sogni.ai/api/v1
-SOCKET_ENDPOINT=wss://socket.sogni.ai
 SOGNI_USERNAME=your_username
 SOGNI_PASSWORD=your_password
-SOGNI_MODEL_ID=flux1-schnell-fp8
 SOGNI_STEPS=12
 SOGNI_WIDTH=768
 SOGNI_HEIGHT=1152
