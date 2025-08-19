@@ -2,8 +2,8 @@
   "name": "sogni-wardrobe-bot",
   "private": true,
   "scripts": {
-    "start": "node src/server.js"  ,
-    "dev": "nodemon src/server.js"
+    "start": "node src/server.js",
+    "start": "node src/server.js" 
   },
   "dependencies": {
     "@sogni-ai/sogni-client": "^3.0.0-alpha.40",

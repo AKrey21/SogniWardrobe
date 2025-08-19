@@ -1,6 +1,5 @@
-// src/prompts/constants.js
+/* --------------------------- constants --------------------------- */
 const GENDERS = ['Male', 'Female', 'Unisex'];
-
 const STYLES = [
   'Formal','Casual','Smart Casual','Business Casual','Streetwear','Preppy',
   'Minimal','Vintage','Workwear','Techwear','Grunge','Skater','Bohemian',
@@ -16,52 +15,70 @@ const RACE_LABELS = {
 };
 
 const COMPLEXIONS = ['Fair','Light-medium','Medium','Tan','Deep'];
+
 const DEFAULT_BATCH = Number(process.env.SOGNI_BATCH || 3);
 
-const NEGATIVE_BASE = [
-  'bad anatomy, deformed, extra limbs, watermark, text, logo, low quality, jpeg artifacts, disfigured, blurry',
-  'multiple people, crowd, background figures',
-  'mannequin, doll, statue, toy, CGI, sketch, cartoon',
-  'incorrect garment fit, wrong fabric texture, mismatched skin tone'
-].join(', ');
+const NEGATIVE_PROMPT =
+  'bad anatomy, deformed, extra limbs, watermark, text, logo, low quality, jpeg artifacts, disfigured, blurry, ' +
+  'multiple people, group, duplicate person, mannequin, doll, statue, toy, sketch, cartoon, CGI, ' +
+  'unrealistic slimming, barbie body, extreme long legs, exaggerated proportions, ' +
+  'incorrect garment fit, wrong fabric texture, mismatched skin tone, wrong ethnicity';
 
+/* --------------------- Enhanced style micro-prompts ----------------------- */
 const STYLE_PROMPTS = {
   Formal:
-    'tailored blazer or suit jacket, crisp shirt, slim trousers or pencil skirt, leather shoes, minimal jewelry, neutral palette',
+    'modern formalwear: tailored blazer or suit jacket, crisp blouse/shirt, slim trousers or pencil skirt, polished heels or leather oxfords, neat belt, minimal jewelry, sleek hairstyle, neutral or dark palette (black, navy, grey, ivory) with clean lines',
+
   Casual:
-    'soft tee, straight-leg jeans/chinos, sneakers or sandals, light overshirt, relaxed but neat look',
+    'everyday modern casual: soft cotton tee or blouse, slim or straight-leg jeans/chinos, sneakers or sandals, lightweight cardigan or overshirt, crossbody bag, neutral and denim-friendly palette, relaxed but neat look',
+
   'Smart Casual':
-    'unstructured blazer/cardigan, knit polo or tucked shirt, chinos or dark denim, loafers or clean sneakers',
+    'stylish smart-casual: unstructured blazer or cardigan, knit polo or tucked shirt, chinos or slim dark denim, loafers or clean sneakers, coordinated belt and shoes, muted tones (navy, beige, grey, olive), sharp but approachable',
+
   'Business Casual':
-    'tucked blouse/button-up, tailored slacks or knee/midi skirt, loafers or block heels, subtle jewelry',
+    'professional business-casual: blouse or button-up shirt tucked in, tailored slacks or knee/midi skirt, loafers or block heels, light knit or blazer layer, subtle jewelry, neutral palette (black, white, beige, navy), ironed and office-appropriate',
+
   Streetwear:
-    'oversized tee/hoodie, wide denim/cargo, chunky sneakers, cap or beanie, one pop colour',
+    'urban streetwear: oversized hoodie or graphic tee, wide-leg cargo or denim, chunky sneakers, baseball cap or beanie, chain necklace, crossbody or mini backpack, monochrome or dark base with one pop colour (red, neon, pastel)',
+
   Preppy:
-    'polo/striped knit, pleated skirt/chinos, loafers/boat shoes, cardigan or blazer, collegiate palette',
+    'contemporary preppy: polo or striped knit, pleated skirt or chinos, loafers or boat shoes, layered cardigan or blazer, clean collar, simple jewelry, navy/cream/forest/burgundy palette, collegiate polish',
+
   Minimal:
-    'clean silhouettes, no visible logos, monochrome/neutral tones, premium fabrics, single accessory',
+    'sleek minimalism: simple clean silhouettes, no visible logos, tailored edges, monochrome or neutral tones (white, beige, black, grey), premium fabrics (cotton, wool, silk blends), single accessory, modern cuts and proportions',
+
   Vintage:
-    'high-rise denim or A-line midi, earthy muted palette, authentic fabrics, retro accents',
+    'modern vintage-inspired: high-rise straight denim or A-line midi dress, muted earthy palette (brown, mustard, teal, cream), retro sunglasses or belt, authentic fabrics (denim, corduroy, cotton), nostalgic without being costume-like',
+
   Workwear:
-    'utility/chore jacket, duck canvas, cargo/work pants, rugged boots, functional pockets, earthy tones',
+    'modern workwear style: utility jacket or denim chore coat, heavyweight cotton or duck canvas, carpenter or cargo pants, rugged boots or sneakers, functional pockets, earthy palette (khaki, olive, navy, tan), durable textured fabrics',
+
   Techwear:
-    'matte nylon shell, articulated cargo pants, trail/tech sneakers, modular straps, dark palette',
+    'functional techwear: waterproof shell jacket, matte nylon, modular straps, articulated cargo pants, zipper or velcro details, trail/tech sneakers, hood or cap, all-black/charcoal/olive palette, futuristic and practical silhouette',
+
   Grunge:
-    'plaid flannel over band tee, ripped straight jeans, combat boots, layered textures, dark palette',
+    '90s grunge revival: plaid flannel over band tee, ripped straight-leg jeans, combat boots, layered chain jewelry, dark palette (black, grey, brick, forest green), messy layered textures, natural makeup or minimal polish',
+
   Skater:
-    'oversized tee/hoodie, baggy jeans/shorts, skate shoes, cap/beanie, graphic accents',
+    'skate style: oversized tee or hoodie, baggy jeans or shorts, skate shoes (Vans, Converse), cap or beanie, visible socks, casual accessories (chain, wristband), graphic accents, relaxed urban palette',
+
   Bohemian:
-    'flowy dresses/blouses, light prints, layered necklaces, earthy palette, natural fabrics',
+    'modern boho chic: flowy maxi dress or blouse with puff sleeves, floral or ethnic prints, layered necklaces, soft earthy palette (sand, terracotta, sage, blush), natural fabrics (cotton, linen), woven or leather accessories',
+
   Festival:
-    'playful textures, cropped layers, shorts/mini skirts, statement sunnies, metallic/neon accents',
+    'festival fashion: bold playful textures (fringe, sequins, mesh), cropped tops or bralette layering, shorts or mini skirts, statement sunglasses, belt bag or harness, metallic or neon accents, boots or comfortable sneakers, colorful makeup vibe',
+
   Y2K:
-    'low-rise bootcut or micro mini, baby tee/ribbed tank, platform sneakers or kitten heels, pastel/metallic accents',
+    'authentic early-2000s Y2K: low-rise bootcut jeans or micro mini skirt, baby tee/ribbed tank/corset top, velour tracksuit or denim-on-denim, platform sneakers or kitten heels, butterfly/rhinestone details, tinted sunglasses, glossy lips, pastel pink/lilac/sky or metallic accents; not high-waisted, not skinny jeans',
+
   Cottagecore:
-    'puff-sleeve blouse/prairie dress, lace/eyelet trims, woven accessories, soft countryside palette',
+    'romantic cottagecore: puff-sleeve blouse or prairie dress, lace or eyelet trims, shirred bodice, midi/maxi skirt, natural fabrics (cotton, linen), woven basket bag, mary janes or ballet flats, cream/sage/blush palette, soft countryside vibe',
+
   'Dark Academia':
-    'wool blazer/trench, turtleneck/collared shirt, plaid skirt/pleated trousers, oxfords, earthy palette',
+    'classic dark academia: wool blazer or trench coat, turtleneck or collared shirt, plaid skirt or pleated trousers, oxford shoes or loafers, leather satchel, rich earthy palette (espresso, camel, grey, forest), scholarly layered look',
+
   Gorpcore:
-    'puffer/fleece, ripstop cargo, technical shell, trail runners, clipped accessories, nature tones'
+    'outdoor gorpcore: puffer jacket or fleece, ripstop cargo or trail pants, technical shell, trail runners or hiking boots, cap or beanie, clip belt or carabiner accessory, natural performance palette (forest, stone, sand, olive), functional layered fabrics'
 };
 
 module.exports = {
@@ -70,6 +87,6 @@ module.exports = {
   RACE_LABELS,
   COMPLEXIONS,
   DEFAULT_BATCH,
-  NEGATIVE_BASE,
+  NEGATIVE_PROMPT,
   STYLE_PROMPTS
 };
