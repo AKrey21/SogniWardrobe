@@ -27,15 +27,16 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
     .grid { display:grid; gap:16px; grid-template-columns: 1fr; }
-    @media (min-width: 760px) { .grid { grid-template-columns: 360px 1fr; } }
+    @media (min-width: 760px) { .grid { grid-template-columns: 380px 1fr; } }
     label { display:block; margin-bottom:6px; color:var(--muted); font-size:13px; }
-    select, input[type="text"], button {
+    select, input[type="text"], input[type="number"], button {
       width:100%; padding:12px 14px; border-radius:12px; border:1px solid #2a2a2a; background:#0f0f0f; color:#e8eaed;
     }
     button { cursor:pointer; font-weight:600; letter-spacing:.2px; }
     .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
     .muted { color:var(--muted); font-size:13px; }
-    .actions { display:flex; gap:10px; }
+    .actions { display:flex; gap:10px; align-items:center; }
     .actions button.primary { background:linear-gradient(90deg, var(--brand), var(--accent)); border:0; }
     .actions button.secondary { background:#141414; }
     .images { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:12px; }
@@ -46,6 +47,7 @@
     @keyframes spin { to { transform: rotate(1turn); } }
     footer { max-width:1050px; margin:32px auto; padding:0 20px 32px; color:var(--muted); font-size:13px; }
     footer a { color: var(--brand); text-decoration: none; }
+    .err { color:#ffb4b4; }
   </style>
 </head>
 <body>
@@ -57,32 +59,75 @@
   <main class="grid">
     <section class="card">
       <div style="display:grid; gap:14px;">
-        <div>
-          <label for="gender">Gender</label>
-          <select id="gender">
-            <option>Male</option>
-            <option>Female</option>
-            <option>Unisex</option>
-          </select>
+        <div class="row3">
+          <div>
+            <label for="gender">Gender</label>
+            <select id="gender">
+              <option>Male</option>
+              <option>Female</option>
+              <option>Unisex</option>
+            </select>
+          </div>
+          <div>
+            <label for="race">Race (SG)</label>
+            <select id="race">
+              <option>Chinese</option>
+              <option>Malay</option>
+              <option>Indian</option>
+              <option>Eurasian</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="complexion">Complexion</label>
+            <select id="complexion">
+              <option>Fair</option>
+              <option>Light-medium</option>
+              <option>Medium</option>
+              <option>Tan</option>
+              <option>Deep</option>
+            </select>
+          </div>
         </div>
 
-        <div>
-          <label for="style">Style</label>
-          <select id="style">
-            <option>Streetwear</option>
-            <option>Casual</option>
-            <option>Smart Casual</option>
-            <option>Business Formal</option>
-            <option>Minimalist</option>
-            <option>Athleisure</option>
-            <option>Vintage</option>
-            <option>Techwear</option>
-          </select>
+        <div class="row">
+          <div>
+            <label for="height">Height (cm)</label>
+            <input id="height" type="number" min="140" max="210" placeholder="e.g., 165" />
+          </div>
+          <div>
+            <label for="weight">Weight (kg)</label>
+            <input id="weight" type="number" min="35" max="160" placeholder="e.g., 60" />
+          </div>
         </div>
 
+<div>
+  <label for="style">Style</label>
+  <select id="style">
+    <option>Formal</option>
+    <option>Casual</option>
+    <option>Smart Casual</option>
+    <option>Business Casual</option>
+    <option>Streetwear</option>
+    <option>Preppy</option>
+    <option>Minimal</option>
+    <option>Vintage</option>
+    <option>Workwear</option>
+    <option>Techwear</option>
+    <option>Grunge</option>
+    <option>Skater</option>
+    <option>Bohemian</option>
+    <option>Festival</option>
+    <option>Y2K</option>
+    <option>Cottagecore</option>
+    <option>Dark Academia</option>
+    <option>Gorpcore</option>
+  </select>
+</div>
+
         <div>
-          <label for="item">Item (e.g., “baby tee”)</label>
-          <input id="item" type="text" placeholder='e.g., "baby tee" or "cargo pants"' />
+          <label for="item">Item to style (e.g., “baby tee”)</label>
+          <input id="item" type="text" placeholder='e.g., "baby tee" or "dark low-rise jeans"' />
         </div>
 
         <div class="row">
@@ -97,7 +142,7 @@
           </div>
           <div>
             <label>&nbsp;</label>
-            <div class="muted">Uses Sogni's <code>spark</code> tokens; defaults optimized for speed.</div>
+            <div class="muted">Uses Sogni’s <code>spark</code> tokens; defaults tuned for SG lookbook shots.</div>
           </div>
         </div>
 
