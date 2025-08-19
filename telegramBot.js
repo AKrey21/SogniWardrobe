@@ -11,21 +11,21 @@ const STYLES = [
 ];
 
 const STYLE_PROMPTS = {
-  'Formal': 'sharp formalwear: tailored suit or dress, crisp shirt, polished shoes, refined accessories, clean grooming',
-  'Casual': 'easy everyday casual: tees, jeans or shorts, sneakers, relaxed fit, simple layers, natural colours',
-  'Smart Casual': 'elevated smart casual: blazers or structured outerwear with chinos/denim, loafers or sleek sneakers',
-  'Business Casual': 'office-ready business casual: shirts/blouses, slacks or midi skirts, loafers, muted palette',
-  'Streetwear': 'modern streetwear: hoodies, graphic tees, baggy jeans, cargos, statement sneakers, cap or beanie',
-  'Preppy': 'preppy vibe: polo or knit, pleated skirt or chinos, loafers, argyle/checks, pastel or primary colours',
-  'Minimal': 'minimalist style: clean lines, neutral palette, simple silhouettes, no logos, high-quality basics',
-  'Vintage': 'retro-inspired: classic cuts and muted tones, era hints without costume, timeless silhouettes',
-  'Workwear': 'workwear-inspired: denim, chore or utility jackets, sturdy fabrics, boots, functional pockets',
-  'Techwear': 'futuristic techwear: water-resistant shells, taped seams, tactical pants, straps, muted monochrome',
-  'Grunge': '90s grunge: flannel, distressed denim, band tee, combat boots, layered dark tones',
-  'Skater': 'skate style: oversized tee/hoodie, loose jeans or shorts, skate shoes, cap, relaxed layers',
-  'Bohemian': 'boho: flowing fabrics, earthy tones, floral prints, layered jewellery, relaxed silhouettes',
-  'Festival': 'festival-ready: bold colours, crop tops or mesh, fringe, playful accessories, fun textures',
-  'Y2K': 'early 2000s Y2K: low-rise jeans or mini, baby tees/camis, shiny or metallic fabrics, chunky accessories, playful pink/purple/metallic accents'
+  'Formal'         : 'tailored suiting, crisp shirt, structured blazer, polished leather shoes, subtle accessories, neat grooming, refined palette',
+  'Casual'         : 'relaxed tees or short-sleeve shirts, jeans or chino shorts, clean sneakers, light layering, breathable fabrics, easy fit for warm weather',
+  'Smart Casual'   : 'unstructured blazer or overshirt with chinos/denim, loafers or sleek sneakers, simple belt, elevated yet relaxed',
+  'Business Casual': 'office-appropriate shirts/blouses, slacks or midi skirt, loafers, muted tones, neat and practical for daily work',
+  'Streetwear'     : 'oversized tees/hoodies, cargo or baggy jeans, statement sneakers, cap or beanie, layered street accessories, confident urban edge',
+  'Preppy'         : 'polo or knit, pleated skirt or chinos, loafers, argyle/checks, collegiate vibe with tidy layering',
+  'Minimal'        : 'neutral palette, clean lines, simple silhouettes, high-quality basics, no loud logos, understated elegance',
+  'Vintage'        : '70s–90s references, denim jackets, corduroy or straight-leg jeans, retro prints, classic accessories, nostalgic but wearable',
+  'Workwear'       : 'chore/utility jacket, sturdy canvas/denim, practical pockets, boots, functional hardware, rugged silhouette',
+  'Techwear'       : 'water-resistant shells, taped seams, tactical pants, straps/harness details, dark monochrome, futuristic performance look',
+  'Grunge'         : '90s flannel, distressed denim, band tee, leather/denim layers, combat boots, moody tones',
+  'Skater'         : 'loose tee/hoodie, relaxed jeans/shorts, skate shoes, beanie or cap, casual layers and movement-friendly fit',
+  'Bohemian'       : 'flowy fabrics, earthy tones, floral or paisley prints, layered jewellery, relaxed artistic vibe',
+  'Festival'       : 'bold colours, crop tops or mesh, fringe and playful textures, statement sunglasses, fun accessories, sparkle-friendly',
+  'Y2K'            : 'authentic early-2000s vibe: baby tee or cami, low-rise jeans or mini skirt, glossy or metallic accessories, platform shoes, tiny shoulder bag, butterfly or hair clips, playful pink/purple/metallic accents'
 };
 
 const COMPLEXIONS = ['Fair', 'Light-medium', 'Medium', 'Tan', 'Deep'];
@@ -195,21 +195,24 @@ function buildPrompt({ gender, style, itemText, heightCm, weightKg, race, comple
 
   const styleText = STYLE_PROMPTS[style] || style;
 
-  //final prompt
+  // final prompt (uses styleText; hard constraints for 1 person & pro shoot)
   return [
-    `Create a high-quality fashion lookbook image featuring a single, full-body ${identity}.`,
-    `Overall aesthetic: ${style}.`,
-    `Centerpiece item to style around: ${itemText}.`,
+    `Create a high-quality fashion lookbook image featuring a full-body ${identity}.`,
+    `Overall aesthetic: ${style}. ${styleText}`,
+    `Centerpiece clothing item: ${itemText}.`,
     `${sgClimate}.`,
-    `One person only. No mannequins, no statues, no duplicate figures, no crowds.`,
-    `Natural human posture and realistic proportions consistent with the stated height and weight.`,
-    `Clean studio or editorial Singapore street background, realistic fabric textures, correct garment sizing and drape.`,
-    `High resolution, sharp details, color-balanced, no text, no watermarks, no artifacts.`
+    `The model must be solo (one person only), full-body, centered, with natural but confident posture.`,
+    `Environment: professional editorial photoshoot with either a clean studio backdrop or a styled Singapore street background with shallow depth of field (blurred).`,
+    `Outfit realism: correct garment drape, fabric texture, and proper fit based on height and weight.`,
+    `High resolution, sharp details, color-balanced, professional lighting.`,
+    `Do not generate groups, mannequins, statues, dolls, duplicate figures, crowds, candid tourist snapshots, selfies, or distorted faces.`
   ].join(' ');
+
 }
 
 const NEGATIVE_PROMPT =
-  'multiple people, group, duplicate person, mannequin, doll, bad anatomy, distorted body, incorrect limb length, exaggerated features, caricature, extra limbs, watermark, text, low quality, jpeg artifacts, disfigured, blurry';
+  'multiple people, group, duplicate person, mannequin, statue, doll, puppet, crowd, selfie, candid snapshot, bad anatomy, distorted body, incorrect limb length, exaggerated features, extra limbs, watermark, text, low quality, jpeg artifacts, disfigured, blurry';
+
 
 // ---------- helper: persist & hydrate ----------
 function persistLast(s) {
