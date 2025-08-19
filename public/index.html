@@ -228,10 +228,9 @@
         background-color: #1a1a1a;
         border-color: #444;
       }
-      .upload-area input[type="file"] {
+      #image-upload {
         display: none;
       }
-      /* UPDATED: Styles for the multi-image preview container */
       #image-preview-container {
         display: flex;
         flex-wrap: wrap;
@@ -240,18 +239,75 @@
         margin-top: 10px;
       }
       #image-preview-container img {
+        display: block;
         max-width: 80px;
         max-height: 80px;
         border-radius: 8px;
         border: 1px solid #2f2f2f;
         object-fit: cover;
       }
+      #items-checklist {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        background: #0f0f0f;
+        border: 1px solid #2a2a2a;
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .checklist-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent);
+        flex-shrink: 0;
+      }
+      .checklist-item input[type="text"] {
+        width: 100%;
+        padding: 6px 8px;
+        font-size: 15px;
+        background-color: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 6px;
+      }
+      .checklist-item label {
+        display: none;
+      }
+      .preview-item {
+        position: relative;
+        display: inline-block;
+      }
+      .preview-item .delete-btn {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 20px;
+        height: 20px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: 1px solid white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .preview-item .delete-btn:hover {
+        background-color: #ff4d4d;
+      }
     </style>
   </head>
   <body>
     <header>
       <h1>Sogni Wardrobe <span class="beta">web beta</span></h1>
-      <div class="badge">hybrid demo</div>
+      <div class="badge">stylist demo</div>
     </header>
 
     <main class="grid">
@@ -279,7 +335,7 @@
           </div>
 
           <div id="text-input-container">
-            <label for="item">Item to style (e.g., “baby tee”)</label>
+            <label for="item">Item to style</label>
             <input
               id="item"
               type="text"
@@ -288,11 +344,28 @@
           </div>
 
           <div id="image-input-container" class="hidden">
-            <label for="image-upload"
-              >Upload photos of your items (e.g., shirt + pants)</label
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
             >
+              <label for="image-upload">Upload photos of your items</label>
+              <button
+                id="clear-images-btn"
+                style="
+                  width: auto;
+                  padding: 4px 10px;
+                  font-size: 12px;
+                  background: #333;
+                "
+              >
+                Clear All
+              </button>
+            </div>
             <label for="image-upload" class="upload-area">
-              <span id="upload-text">Click to select up to 5 images</span>
+              <span id="upload-text">Click to add up to 5 images</span>
               <div id="image-preview-container"></div>
             </label>
             <input type="file" id="image-upload" accept="image/*" multiple />
@@ -379,6 +452,13 @@
             </select>
           </div>
 
+          <div id="items-checklist-container" class="hidden">
+            <label
+              >3. Edit item names if needed, then select items to include</label
+            >
+            <div id="items-checklist"></div>
+          </div>
+
           <div class="row">
             <div>
               <label for="batch">Photos per run</label>
@@ -391,10 +471,7 @@
             </div>
             <div>
               <label>&nbsp;</label>
-              <div class="muted">
-                Uses Sogni’s <code>spark</code> tokens; defaults tuned for SG
-                lookbook shots.
-              </div>
+              <div class="muted">Uses Sogni’s <code>spark</code> tokens.</div>
             </div>
           </div>
 
@@ -427,39 +504,95 @@
         Tip: You can either describe an item or upload one or more photos of
         your items for the AI to analyze.
       </p>
-      <p>
-        Built for NTU x Base hackathon demo. This web app <em>doesn’t</em> need
-        Telegram.
-      </p>
+      <p>Built for NTU x Base hackathon demo.</p>
     </footer>
 
     <script>
+      window.stagedFiles = [];
+
       const imageUploadInput = document.getElementById("image-upload");
       const previewContainer = document.getElementById(
         "image-preview-container"
       );
       const uploadText = document.getElementById("upload-text");
+      const clearImagesBtn = document.getElementById("clear-images-btn");
 
-      imageUploadInput.addEventListener("change", (event) => {
-        previewContainer.innerHTML = ""; // Clear previous previews
-        const files = event.target.files;
-        if (files && files.length > 0) {
-          uploadText.textContent = `${files.length} image(s) selected`;
-          for (const file of files) {
+      function isDuplicate(file) {
+        return window.stagedFiles.some(
+          (existingFile) =>
+            existingFile.name === file.name &&
+            existingFile.size === file.size &&
+            existingFile.lastModified === file.lastModified
+        );
+      }
+
+      function renderPreviews() {
+        previewContainer.innerHTML = "";
+        if (window.stagedFiles.length > 0) {
+          uploadText.textContent = `${window.stagedFiles.length} image(s) selected`;
+          window.stagedFiles.forEach((file, index) => {
             const reader = new FileReader();
             reader.onload = (e) => {
+              const previewWrapper = document.createElement("div");
+              previewWrapper.className = "preview-item";
+
               const img = document.createElement("img");
               img.src = e.target.result;
-              previewContainer.appendChild(img);
+
+              const deleteBtn = document.createElement("span");
+              deleteBtn.className = "delete-btn";
+              deleteBtn.innerHTML = "&times;";
+              deleteBtn.dataset.index = index;
+
+              deleteBtn.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const indexToRemove = parseInt(event.target.dataset.index, 10);
+                window.stagedFiles.splice(indexToRemove, 1);
+                renderPreviews();
+              });
+
+              previewWrapper.appendChild(img);
+              previewWrapper.appendChild(deleteBtn);
+              previewContainer.appendChild(previewWrapper);
             };
             reader.readAsDataURL(file);
-          }
+          });
         } else {
-          uploadText.textContent = "Click to select up to 5 images";
+          uploadText.textContent = "Click to add up to 5 images";
         }
+      }
+
+      imageUploadInput.addEventListener("change", (event) => {
+        const newFiles = Array.from(event.target.files);
+
+        newFiles.forEach((file) => {
+          if (!isDuplicate(file)) {
+            window.stagedFiles.push(file);
+          } else {
+            console.log(`Duplicate file ignored: ${file.name}`);
+          }
+        });
+
+        if (window.stagedFiles.length > 5) {
+          alert(
+            "You can upload a maximum of 5 images. The extras have been removed."
+          );
+          window.stagedFiles = window.stagedFiles.slice(0, 5);
+        }
+
+        renderPreviews();
+        imageUploadInput.value = "";
+      });
+
+      clearImagesBtn.addEventListener("click", () => {
+        window.stagedFiles = [];
+        renderPreviews();
+
+        const resetEvent = new Event("clear");
+        document.dispatchEvent(resetEvent);
       });
     </script>
     <script src="./app.js"></script>
   </body>
 </html>
-

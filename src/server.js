@@ -1,14 +1,14 @@
-// server.js (Corrected Version)
+// src/server.js (Corrected and Updated for the new feature)
 
 require("dotenv").config();
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
 
-// --- UPDATED: Corrected file paths ---
-// The paths are now relative to the current file's location inside 'src'
+// --- UPDATED: Import ALL THREE router files ---
 const generateFromTextRouter = require("./routes/generate");
 const generateFromImageRouter = require("./routes/generateFromImage");
+const analyzeItemsRouter = require("./routes/analyzeItems"); // NEW
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,9 +24,10 @@ app.use(express.static(path.join(__dirname, "../public")));
 // Healthcheck
 app.get("/heartbeat", (_req, res) => res.send("OK"));
 
-// --- Mount BOTH API routers ---
+// --- UPDATED: Mount ALL THREE API routers ---
 app.use("/api", generateFromTextRouter);
 app.use("/api", generateFromImageRouter);
+app.use("/api", analyzeItemsRouter); // NEW
 
 /* -------------------------- bootstrap --------------------------- */
 app.listen(PORT, "0.0.0.0", () => {

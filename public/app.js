@@ -16,22 +16,40 @@
     images: document.getElementById("images"),
     status: document.getElementById("status"),
 
-    // Elements for the toggle
+    // Elements for the toggle and new checklist
     modeTextRadio: document.getElementById("mode-text"),
     modeImageRadio: document.getElementById("mode-image"),
     textInputContainer: document.getElementById("text-input-container"),
     imageInputContainer: document.getElementById("image-input-container"),
+    itemsChecklistContainer: document.getElementById(
+      "items-checklist-container"
+    ),
+    itemsChecklist: document.getElementById("items-checklist"),
   };
 
   const STORE_KEY = "sogni-wardrobe.profile";
   let lastPayload = null;
-  let lastMode = "text"; // Keep track of the last mode used for regeneration
+  let lastMode = "text";
+  let imageWorkflowState = "idle";
+  let stagedFormData = null;
 
-  // --- Event listeners for the input mode toggle ---
+  // UPDATED: This function no longer controls the button text
+  function resetImageWorkflow() {
+    imageWorkflowState = "idle";
+    stagedFormData = null;
+    els.itemsChecklistContainer.classList.add("hidden");
+    els.itemsChecklist.innerHTML = "";
+  }
+
+  document.addEventListener("clear", resetImageWorkflow);
+
   els.modeTextRadio.addEventListener("change", () => {
     if (els.modeTextRadio.checked) {
       els.textInputContainer.classList.remove("hidden");
       els.imageInputContainer.classList.add("hidden");
+      els.go.textContent = "Generate"; // Set button text for this mode
+      els.regen.style.display = "block";
+      resetImageWorkflow();
     }
   });
 
@@ -39,16 +57,24 @@
     if (els.modeImageRadio.checked) {
       els.textInputContainer.classList.add("hidden");
       els.imageInputContainer.classList.remove("hidden");
+      els.go.textContent = "Analyze Items"; // Set button text for this mode
+      els.regen.style.display = "none";
+      resetImageWorkflow();
     }
   });
 
   hydrate();
   setRegenEnabled(false);
+  if (els.modeImageRadio.checked) {
+    els.regen.style.display = "none";
+  }
 
   function setLoading(v) {
     els.loading.classList.toggle("hidden", !v);
     els.go.disabled = v;
-    els.regen.disabled = v || !lastPayload;
+    if (lastPayload) {
+      els.regen.disabled = v;
+    }
   }
 
   function setRegenEnabled(v) {
@@ -153,7 +179,7 @@
     setLoading(true);
     els.status.textContent = isRegen ? "Regenerating…" : "Generating…";
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 25000); // Increased timeout
+    const t = setTimeout(() => ctrl.abort(), 25000);
 
     try {
       const resp = await fetch("/api/generate", {
@@ -185,7 +211,8 @@
 
   async function runImageGeneration(formData) {
     setLoading(true);
-    els.status.textContent = "Analyzing image(s) and generating style…";
+    imageWorkflowState = "generating";
+    els.status.textContent = "Generating final style…";
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 25000);
 
@@ -203,7 +230,8 @@
       lastPayload = null;
       setRegenEnabled(false);
       showImages(data.images || []);
-      els.status.textContent = `Done • Generated a new style based on: “${data.meta.itemText}”`;
+      const finalItems = formData.get("itemText");
+      els.status.textContent = `Done • Generated a new style based on: “${finalItems}”`;
     } catch (e) {
       const msg =
         e.name === "AbortError"
@@ -213,43 +241,134 @@
     } finally {
       clearTimeout(t);
       setLoading(false);
+      resetImageWorkflow();
+      els.go.textContent = "Analyze Items"; // Reset button text after generation
     }
+  }
+
+  async function runAnalysis(formData) {
+    setLoading(true);
+    imageWorkflowState = "analyzing";
+    els.status.textContent = "Analyzing items with AI…";
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 25000);
+
+    try {
+      const resp = await fetch("/api/analyze-items", {
+        method: "POST",
+        body: formData,
+        signal: ctrl.signal,
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok)
+        throw new Error(data?.error || `Analysis failed (HTTP ${resp.status})`);
+
+      displayItemsChecklist(data.items);
+      imageWorkflowState = "analyzed";
+      els.go.textContent = "Generate Style";
+      els.status.textContent =
+        "Analysis complete. Select your items and generate.";
+    } catch (e) {
+      const msg =
+        e.name === "AbortError"
+          ? "Request timed out. Please try again."
+          : e.message;
+      els.status.innerHTML = `<span class="err">Error:</span> ${msg}`;
+      resetImageWorkflow();
+    } finally {
+      clearTimeout(t);
+      setLoading(false);
+    }
+  }
+
+  function displayItemsChecklist(items) {
+    els.itemsChecklist.innerHTML = "";
+    items.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "checklist-item";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = `item-checkbox-${index}`;
+      checkbox.checked = true;
+
+      const textInput = document.createElement("input");
+      textInput.type = "text";
+      textInput.id = `item-text-${index}`;
+      textInput.value = item;
+
+      div.appendChild(checkbox);
+      div.appendChild(textInput);
+      els.itemsChecklist.appendChild(div);
+    });
+    els.itemsChecklistContainer.classList.remove("hidden");
   }
 
   els.go.addEventListener("click", () => {
     try {
       if (els.modeTextRadio.checked) {
-        // --- TEXT MODE ---
         lastMode = "text";
         const payload = readTextPayload();
         persistProfile(payload);
         runTextGeneration(payload, false);
       } else {
-        // --- IMAGE MODE ---
         lastMode = "image";
-        const imageFiles = els.imageUpload.files; // UPDATED: Get the whole list of files
-        if (!imageFiles || imageFiles.length === 0) {
-          throw new Error("Please upload at least one image file.");
-        }
-        if (imageFiles.length > 5) {
-          throw new Error("You can upload a maximum of 5 images.");
-        }
 
-        const payload = readImagePayload();
-        persistProfile(payload);
-        const formData = new FormData();
-
-        // --- UPDATED: Loop through all files and append them ---
-        for (const file of imageFiles) {
-          formData.append("image_files", file); // Use the key 'image_files' (plural)
-        }
-
-        for (const key in payload) {
-          if (payload[key] !== null) {
-            formData.append(key, payload[key]);
+        if (
+          imageWorkflowState === "idle" ||
+          imageWorkflowState === "generating"
+        ) {
+          const imageFiles = window.stagedFiles;
+          if (!imageFiles || imageFiles.length === 0) {
+            throw new Error("Please upload at least one image file.");
           }
+
+          const payload = readImagePayload();
+          persistProfile(payload);
+
+          stagedFormData = new FormData();
+          for (const file of imageFiles) {
+            stagedFormData.append("image_files", file);
+          }
+          for (const key in payload) {
+            if (payload[key] !== null) {
+              stagedFormData.append(key, payload[key]);
+            }
+          }
+          runAnalysis(stagedFormData);
+        } else if (imageWorkflowState === "analyzed") {
+          const selectedItems = [];
+          const deselectedItems = [];
+
+          els.itemsChecklist
+            .querySelectorAll(".checklist-item")
+            .forEach((itemDiv) => {
+              const checkbox = itemDiv.querySelector('input[type="checkbox"]');
+              const textInput = itemDiv.querySelector('input[type="text"]');
+
+              if (checkbox.checked) {
+                selectedItems.push(textInput.value.trim());
+              } else {
+                deselectedItems.push(textInput.value.trim());
+              }
+            });
+
+          if (selectedItems.length === 0) {
+            throw new Error(
+              "Please select at least one item to generate a style for."
+            );
+          }
+
+          stagedFormData.append("itemText", selectedItems.join(", "));
+          if (deselectedItems.length > 0) {
+            stagedFormData.append(
+              "deselectedItems",
+              deselectedItems.join(", ")
+            );
+          }
+
+          runImageGeneration(stagedFormData);
         }
-        runImageGeneration(formData);
       }
     } catch (e) {
       els.status.innerHTML = `<span class="err">${e.message}</span>`;
@@ -258,9 +377,6 @@
 
   els.regen.addEventListener("click", () => {
     if (!lastPayload || lastMode !== "text") {
-      alert(
-        "Regeneration is only supported for the text-based workflow at this time."
-      );
       return;
     }
     try {

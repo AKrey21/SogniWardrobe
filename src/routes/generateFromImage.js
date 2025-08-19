@@ -1,66 +1,52 @@
 // src/routes/generateFromImage.js
 
 const express = require("express");
-const multer = require("multer"); // Handles file uploads
+const multer = require("multer");
 const {
   GENDERS,
   STYLES,
   DEFAULT_BATCH,
   NEGATIVE_PROMPT,
-  RACE_LABELS,
 } = require("../prompts/constants");
 const { buildPrompt } = require("../prompts/buildPrompt");
 const { getSogniClient } = require("../sogni/client");
-// UPDATED: Import the new multi-image helper
-const { analyzeImagesWithGemini } = require("../services/gemini");
 
 const router = express.Router();
-
-// Setup multer for in-memory file handling
 const upload = multer({ storage: multer.memoryStorage() });
 
-/* -------------------------------------------------------------
-  API Endpoint to Generate from MULTIPLE Images
-  -------------------------------------------------------------
-*/
-// UPDATED: Use upload.array() to accept up to 5 files with the key 'image_files'
 router.post(
   "/generate-from-image",
   upload.array("image_files", 5),
   async (req, res) => {
     try {
-      // 1. --- Gemini Analysis Step ---
-      // UPDATED: Check for req.files (plural)
+      const {
+        gender,
+        style,
+        batch,
+        heightCm,
+        weightKg,
+        race,
+        complexion,
+        itemText,
+        deselectedItems, // --- NEW: Receive the deselected items ---
+      } = req.body || {};
+
       if (!req.files || req.files.length === 0) {
         return res
           .status(400)
-          .json({ error: "At least one image file is required." });
+          .json({ error: "Image files are required for generation." });
       }
-
-      // UPDATED: Call the new multi-image Gemini helper, passing the array of files
-      const itemTextFromGemini = await analyzeImagesWithGemini(req.files);
-
-      // --- ADD THIS LINE TO TEST GEMINI ---
-      console.log("✅ Gemini Analysis Result:", itemTextFromGemini);
-      // --- END OF TEST LINE ---
-
-      if (!itemTextFromGemini) {
+      if (!itemText) {
         return res
-          .status(500)
-          .json({ error: "Gemini analysis failed to return a description." });
+          .status(400)
+          .json({ error: "A list of selected items (itemText) is required." });
       }
-      // --- End of Gemini Step ---
-
-      // 2. --- Use Gemini's synthesized output in your existing logic ---
-      const { gender, style, batch, heightCm, weightKg, race, complexion } =
-        req.body || {};
 
       const g = (gender || "").trim();
       const s = (style || "").trim();
-      const item = itemTextFromGemini; // The key change: using Gemini's synthesized analysis
+      const item = itemText;
       const n = Math.max(1, Math.min(Number(batch || DEFAULT_BATCH), 6));
 
-      // --- Validation and Sogni Client Setup (Your existing logic) ---
       if (!GENDERS.includes(g))
         return res
           .status(400)
@@ -76,7 +62,6 @@ router.post(
           .status(503)
           .json({ error: "Sogni not connected yet. Try again." });
 
-      // --- Prompt Building (Your existing powerful logic) ---
       const prompt = buildPrompt({
         gender: g,
         style: s,
@@ -87,23 +72,31 @@ router.post(
         complexion,
       });
 
-      // --- IMPORTANT: Paste your full, detailed negative prompt logic back in here ---
-      const negativePrompt = [
-        NEGATIVE_PROMPT,
-        // ... your logic for sceneNegatives, croppingNegatives, anatomyNegatives, etc.
-      ]
-        .filter(Boolean)
-        .join(", ");
+      // --- UPDATED: Dynamically build the negative prompt ---
+      const negativePromptParts = [NEGATIVE_PROMPT];
+      // IMPORTANT: Paste your existing detailed negative prompt logic here,
+      // pushing each part into the negativePromptParts array.
+      // For example:
+      // negativePromptParts.push(sceneNegatives);
+      // negativePromptParts.push(croppingNegatives);
+      // etc.
 
-      // --- Sogni API Call (Your existing logic) ---
+      // --- NEW: Add the deselected items to the negative prompt ---
+      if (deselectedItems) {
+        const deselectedPrompt = `NOT ${deselectedItems.replace(
+          /,\s*/g,
+          ", NOT "
+        )}`;
+        negativePromptParts.push(deselectedPrompt);
+      }
+
+      const negativePrompt = negativePromptParts.filter(Boolean).join(", ");
+
       const model = process.env.SOGNI_MODEL_ID || "flux1-schnell-fp8";
       const steps = Number(process.env.SOGNI_STEPS || 12);
       const width = Number(process.env.SOGNI_WIDTH || 768);
       const height = Number(process.env.SOGNI_HEIGHT || 1152);
       const guidance = Number(process.env.SOGNI_GUIDANCE || 3.5);
-
-      console.log("Generated prompt:", prompt);
-      console.log("Negative prompt:", negativePrompt);
 
       const project = await sogni.projects.create({
         tokenType: "spark",
@@ -122,18 +115,15 @@ router.post(
       const images = await project.waitForCompletion();
 
       if (!images || !images.length) {
-        return res.status(422).json({
-          error: "No images generated (possibly blocked by safety filters).",
-        });
+        return res.status(422).json({ error: "No images generated." });
       }
 
-      // 3. --- Send Final Response ---
       res.json({
         images: images.slice(0, n),
         meta: {
           prompt,
           negativePrompt,
-          itemText: itemTextFromGemini,
+          itemText: item,
           gender: g,
           style: s,
           batch: n,
