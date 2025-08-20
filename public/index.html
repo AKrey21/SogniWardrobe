@@ -6,57 +6,54 @@
   <title>Sogni Wardrobe — Web</title>
   <link rel="icon" href="data:," />
 
-  <!-- Tailwind (CDN) -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      theme: {
-        extend: {
-          colors: { brand: '#22d3ee', accent: '#a78bfa' }
-        }
-      }
+      theme: { extend: { colors: { brand: '#22d3ee', accent: '#a78bfa' } } }
     }
   </script>
 </head>
 
-<body class="min-h-screen text-neutral-100 selection:bg-brand/30 selection:text-black"
+<body class="scroll-smooth min-h-screen text-neutral-100 selection:bg-brand/30 selection:text-black"
   style="background:
     radial-gradient(1000px 400px at 20% -10%, rgba(167,139,250,.15), transparent),
     radial-gradient(800px 400px at 120% 20%, rgba(110,231,255,.15), transparent),
     #0b0b0b;">
 
   <!-- Header -->
-  <header class="max-w-5xl mx-auto px-5 py-6 flex items-center justify-between">
+  <header id="top" class="max-w-5xl mx-auto px-5 py-6 flex items-center justify-between">
     <h1 class="m-0 text-[clamp(18px,3vw,28px)] tracking-wide font-semibold">
       Sogni Wardrobe
-      <span class="ml-2 text-xs text-neutral-400 bg-neutral-800/80 px-2.5 py-1 rounded-full ring-1 ring-white/10">web beta</span>
+      <span class="ml-2 text-xs text-neutral-400 bg-neutral-800/80 px-2.5 py-1 rounded-full ring-1 ring-white/10">
+        web beta
+      </span>
     </h1>
     <div class="inline-flex items-center gap-2 text-xs ring-1 ring-white/10 px-3 py-1.5 rounded-full bg-neutral-900/70">
       stylist demo
     </div>
   </header>
 
-  <!-- Main -->
+  <!-- Main (Generator UI) -->
   <main class="max-w-5xl mx-auto px-5 pb-10 grid gap-4 md:grid-cols-[380px_1fr]">
     <!-- Controls -->
     <section class="bg-white/[.03] ring-1 ring-white/10 rounded-2xl p-4 md:p-5 backdrop-blur shadow-[0_10px_30px_rgba(0,0,0,.35)]">
       <div class="grid gap-4">
-
         <!-- 1. Input mode toggle -->
         <div>
           <label class="block mb-1.5 text-sm text-neutral-400">1. Choose Your Input Method</label>
           <div class="grid grid-cols-2 gap-2 p-1 rounded-xl ring-1 ring-neutral-800 bg-neutral-950">
             <input id="mode-text" name="input_mode" type="radio" class="peer/mtext hidden" checked>
             <label for="mode-text"
-                   class="text-center px-3 py-2 rounded-lg cursor-pointer text-sm text-neutral-400
-                          peer-checked/mtext:bg-neutral-800 peer-checked/mtext:text-neutral-100">
+              class="text-center px-3 py-2 rounded-lg cursor-pointer text-sm text-neutral-400
+                     peer-checked/mtext:bg-neutral-800 peer-checked/mtext:text-neutral-100">
               Describe Item
             </label>
 
             <input id="mode-image" name="input_mode" type="radio" class="peer/mimg hidden">
             <label for="mode-image"
-                   class="text-center px-3 py-2 rounded-lg cursor-pointer text-sm text-neutral-400
-                          peer-checked/mimg:bg-neutral-800 peer-checked/mimg:text-neutral-100">
+              class="text-center px-3 py-2 rounded-lg cursor-pointer text-sm text-neutral-400
+                     peer-checked/mimg:bg-neutral-800 peer-checked/mimg:text-neutral-100">
               Upload Photos
             </label>
           </div>
@@ -185,21 +182,24 @@
     </section>
   </main>
 
-  <!-- Wardrobe -->
-  <section class="max-w-5xl mx-auto px-5 mt-4">
-    <div class="bg-white/[.03] ring-1 ring-white/10 rounded-2xl p-4 md:p-5 backdrop-blur shadow-[0_10px_30px_rgba(0,0,0,.35)]">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-sm text-neutral-400">Wardrobe (Saved)</div>
-        <div class="flex items-center gap-2">
-          <button id="view-wardrobe" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-800 ring-1 ring-neutral-700">View all</button>
-          <button id="clear-wardrobe" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-800 ring-1 ring-neutral-700">Clear all</button>
-        </div>
+<!-- Wardrobe (Saved) -->
+<section class="max-w-5xl mx-auto px-5 mt-4">
+  <div class="bg-white/[.03] ring-1 ring-white/10 rounded-2xl p-4 md:p-5 backdrop-blur shadow-[0_10px_30px_rgba(0,0,0,.35)]">
+    <div class="flex items-center justify-between mb-2">
+      <div class="text-sm text-neutral-400">Wardrobe (Saved)</div>
+      <div class="flex items-center gap-2">
+        <a href="/lookbook.html" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-800 ring-1 ring-neutral-700 hover:bg-neutral-700">
+          Make lookbook
+        </a>
+        <button id="view-wardrobe" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-800 ring-1 ring-neutral-700">View all</button>
+        <button id="clear-wardrobe" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-800 ring-1 ring-neutral-700">Clear all</button>
       </div>
-      <div id="wardrobe-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 items-start"></div>
     </div>
-  </section>
+    <div id="wardrobe-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 items-start"></div>
+  </div>
+</section>
 
-  <!-- Upload preview helpers -->
+  <!-- Upload preview helpers (image mode) -->
   <script>
     window.stagedFiles = [];
     const imageUploadInput = document.getElementById('image-upload');
@@ -263,22 +263,20 @@
     });
   </script>
 
-  <!-- Scripts -->
-  <script src="./app.js"></script>
-  <script src="./wardrobe.js"></script>
+  <!-- App + Wardrobe -->
+  <script src="/app.js"></script>
+  <script src="/wardrobe.js"></script>
   <script>
-    // Boot Wardrobe grid & buttons
     Wardrobe.mountGrid(document.getElementById('wardrobe-grid'));
     document.getElementById('clear-wardrobe')?.addEventListener('click', () => {
       Wardrobe.getAll().forEach(url => Wardrobe.remove(url));
     });
-    // View all (if provided by wardrobe.js slideshow, else it will no-op)
     document.getElementById('view-wardrobe')?.addEventListener('click', () => {
       if (Wardrobe.viewAll) Wardrobe.viewAll();
       else {
         const urls = Wardrobe.getAll();
         if (urls.length === 0) alert('No saved looks yet.');
-        else window.Lightbox?.open(urls[0]);
+        else window.open(urls[0], '_blank');
       }
     });
   </script>

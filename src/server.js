@@ -1,41 +1,77 @@
 // src/server.js
 require("dotenv").config();
 const path = require("path");
+const { Readable } = require("stream");
 const express = require("express");
 const cors = require("cors");
-
-// Routers
-const generateFromTextRouter = require("./routes/generate");
-const generateFromImageRouter = require("./routes/generateFromImage");
-const analyzeItemsRouter = require("./routes/analyzeItems");
-
-// NEW: image proxy router
-const proxyRouter = require("./routes/proxy");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/* ----------------------- express setup -------------------------- */
+/* ----------------------- core middleware ----------------------- */
 app.use(cors());
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static assets from /public (one level up from /src)
-app.use(express.static(path.join(__dirname, "../public")));
+/* ----------------------- static frontend ----------------------- */
+// Serve everything from /public at the web root (/, /app.js, /lookbook.js, etc.)
+const publicDir = path.resolve(__dirname, "../public");
+app.use(express.static(publicDir)); // express official way to serve static files. :contentReference[oaicite:0]{index=0}
 
-// Healthcheck
+// If you ever need a manual fallback:
+// app.get("/", (_req, res) => res.sendFile(path.join(publicDir, "index.html")));
+
+/* -------------------------- healthcheck ------------------------ */
 app.get("/heartbeat", (_req, res) => res.send("OK"));
 
-/* ------------------------- API routes --------------------------- */
-app.use("/api", generateFromTextRouter);
-app.use("/api", generateFromImageRouter);
-app.use("/api", analyzeItemsRouter);
+/* --------------------------- API routes ------------------------ */
+// These three stay as-is if you already have them:
+try {
+  app.use("/api", require("./routes/generate"));
+  app.use("/api", require("./routes/generateFromImage"));
+  app.use("/api", require("./routes/analyzeItems"));
+} catch (e) {
+  if (e.code !== "MODULE_NOT_FOUND") throw e;
+  console.warn("[warn] Some generate/analyze routes missing; skipping.");
+}
 
-// NEW: mount the image proxy at /api/proxy
-app.use("/api", proxyRouter);
+/* --------------------------- image proxy ----------------------- */
+// Lookbook loads images via /api/proxy?url=... to avoid CORS issues in html2pdf.
+// Uses native fetch (Node 18+), or add `node-fetch` if you’re on older Node. :contentReference[oaicite:1]{index=1}
+app.get("/api/proxy", async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) return res.status(400).send("Missing url");
 
-/* -------------------------- bootstrap --------------------------- */
+    const upstream = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+
+    if (!upstream.ok) {
+      return res.status(upstream.status).send("Upstream error");
+    }
+
+    res.setHeader(
+      "Content-Type",
+      upstream.headers.get("content-type") || "application/octet-stream"
+    );
+    res.setHeader("Cache-Control", "public, max-age=86400");
+
+    // undici fetch returns a Web ReadableStream in Node 18+; convert if needed
+    if (upstream.body && typeof upstream.body.getReader === "function") {
+      return Readable.fromWeb(upstream.body).pipe(res);
+    }
+    return upstream.body ? upstream.body.pipe(res) : res.end();
+  } catch (err) {
+    console.error("[proxy] error:", err);
+    res.status(502).send("Proxy failed");
+  }
+});
+
+/* ---------------------------- boot ----------------------------- */
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Web app ready on http://localhost:${PORT}`);
-  console.log(`Lookbook at http://localhost:${PORT}/lookbook/`);
+  console.log(`✅ Web app ready:  http://localhost:${PORT}`);
+  console.log(`   Static root:    ${publicDir}`);
+  console.log(`   Heartbeat:      http://localhost:${PORT}/heartbeat`);
+  console.log(`   Image proxy:    http://localhost:${PORT}/api/proxy?url=<encoded>`);
 });

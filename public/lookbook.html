@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sogni Lookbook</title>
+  <link rel="icon" href="data:," />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Interact.js (drag/resize) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/interactjs@1.10.17/dist/interact.min.js"></script>
+
+  <!-- html2pdf bundle (jsPDF + html2canvas) -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- Lookbook templates + Wardrobe API + Lookbook logic -->
+  <script defer src="/templates.js"></script>
+  <script defer src="/wardrobe.js"></script>
+  <script defer src="/lookbook.js"></script>
+</head>
+
+<body class="min-h-screen bg-gray-50 text-gray-900">
+  <!-- Top bar -->
+  <header class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+    <a href="/"
+       class="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-100">
+      ← Back to Wardrobe
+    </a>
+
+    <!-- Desktop actions -->
+    <div class="hidden sm:flex items-center gap-2">
+      <select id="templateSelect" class="border border-gray-300 bg-white rounded-lg px-3 py-2 text-sm">
+        <option value="">Apply Template to Page…</option>
+        <option value="cover">Cover</option>
+        <option value="grid3">Grid ×3</option>
+        <option value="full">Full Bleed</option>
+      </select>
+      <button id="addBlank" class="px-3 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-sm">+ Blank</button>
+      <button id="deletePage" class="px-3 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-sm">Delete Page</button>
+      <button id="exportPdf" class="px-3 py-2 rounded-lg bg-black text-white border border-black hover:brightness-105 text-sm">Export PDF</button>
+    </div>
+
+    <!-- Mobile: open drawer (we’ll auto-open in landscape) -->
+    <div class="sm:hidden flex items-center gap-2">
+      <button id="lockLandscapeBtn"
+              class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm">
+        Lock landscape
+      </button>
+      <button id="openSidebar"
+              class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm">
+        Wardrobe
+      </button>
+    </div>
+  </header>
+
+  <!-- Overlay asking to rotate when in portrait -->
+  <div id="rotateOverlay"
+       class="fixed inset-0 bg-white z-50 hidden items-center justify-center p-8 text-center">
+    <div class="max-w-sm">
+      <div class="text-2xl font-extrabold mb-2">Rotate your phone</div>
+      <p class="text-gray-600 mb-4">
+        The Lookbook works best in landscape. Turn your device sideways.
+      </p>
+      <button id="tryLockBtn"
+              class="px-4 py-2 rounded-lg bg-black text-white text-sm">
+        Try lock to landscape
+      </button>
+      <p class="text-xs text-gray-500 mt-3">
+        (On iOS Safari, rotation lock isn’t supported — just rotate manually.)
+      </p>
+    </div>
+  </div>
+
+  <!-- Mobile drawer shade -->
+  <div id="drawerShade" class="sm:hidden fixed inset-0 bg-black/40 hidden"></div>
+
+  <!-- Main -->
+  <main id="lb-main" class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 p-4 sm:p-6 items-start">
+    <!-- Sidebar (drawer on mobile, static on >= sm; we auto-open in landscape) -->
+    <aside id="lb-sidebar"
+           class="fixed sm:static inset-y-0 left-0 z-40 sm:z-auto
+                  w-[88%] max-w-[360px] sm:w-[300px] sm:max-w-none
+                  bg-white border border-gray-200 rounded-none sm:rounded-2xl
+                  p-4 h-full sm:h-[calc(100vh-160px)]
+                  overflow-auto shadow-xl sm:shadow-sm
+                  -translate-x-full sm:translate-x-0 transform transition-transform">
+      <div class="flex items-center justify-between mb-3">
+        <div class="font-extrabold">Wardrobe</div>
+        <button id="closeSidebar" class="sm:hidden text-sm px-2 py-1 rounded border border-gray-300 bg-white">Close</button>
+      </div>
+      <div id="lb-gallery" class="grid grid-cols-3 sm:grid-cols-2 gap-4"></div>
+
+      <!-- Mobile actions inside drawer -->
+      <div class="mt-4 sm:hidden flex flex-wrap gap-2">
+        <select id="templateSelect_m" class="border border-gray-300 bg-white rounded-lg px-3 py-2 text-sm flex-1">
+          <option value="">Template…</option>
+          <option value="cover">Cover</option>
+          <option value="grid3">Grid ×3</option>
+          <option value="full">Full Bleed</option>
+        </select>
+        <button id="addBlank_m"   class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm">+ Blank</button>
+        <button id="deletePage_m" class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm">Delete</button>
+        <button id="exportPdf_m"  class="px-3 py-2 rounded-lg bg-black text-white text-sm">Export</button>
+      </div>
+    </aside>
+
+    <!-- Stage -->
+    <section class="flex-1 min-w-0">
+      <div id="lb-help" class="text-gray-500 px-1 sm:px-4 py-2 text-sm">
+        Drag items from the Wardrobe onto a page. Tap empty space to deselect.
+        <span class="hidden sm:inline">Alt/Option + drag on an image to pan.</span>
+      </div>
+
+      <!-- Pages; each page will size itself to fill the landscape viewport -->
+      <div id="pages" class="flex flex-col gap-6 sm:gap-8 p-1 sm:p-4 items-center"></div>
+    </section>
+  </main>
+
+  <footer id="lb-footer" class="max-w-7xl mx-auto text-gray-500 px-4 py-3">
+    Autosaves to your browser (localStorage). No server changes.
+  </footer>
+</body>
+</html>
