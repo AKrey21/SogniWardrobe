@@ -1,0 +1,106 @@
+:root {
+  --lb-bg: #f6f7f8;
+  --lb-ink: #1f2328;
+  --lb-muted: #9aa1a8;
+  /* Fixed safe margins inside each page (set to 5% for wider margins) */
+  --safe: 3%;
+}
+
+/* ---------- Base ---------- */
+.lb-body {
+  margin: 0;
+  background: var(--lb-bg);
+  color: var(--lb-ink);
+  font: 14px/1.45 system-ui, -apple-system, Segoe UI, Inter, Roboto, sans-serif;
+}
+
+.lb-topbar {
+  position: sticky; top: 0; z-index: 10; display: flex; gap: 12px;
+  justify-content: space-between; align-items: center; padding: 12px 16px;
+  background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,.06);
+}
+.lb-title { font-weight: 800; letter-spacing: .03em; }
+.lb-actions { display: flex; gap: 8px; align-items: center; }
+.lb-select, .lb-btn {
+  border: 1px solid #d0d7de; background: #fff; border-radius: 8px;
+  padding: 8px 10px; cursor: pointer;
+}
+.lb-btn:hover { background: #f3f4f6; }
+.lb-primary { background: #111; color:#fff; border-color:#111; }
+.lb-primary:hover { filter: brightness(1.05); }
+.lb-help { color: var(--lb-muted); padding: 8px 16px; }
+.lb-footer { color: var(--lb-muted); padding: 12px 16px; }
+
+/* ---------- Layout ---------- */
+.lb-main { display: flex; gap: 16px; padding: 16px; align-items: flex-start; }
+.lb-stage { flex: 1; min-width: 0; }
+
+/* ---------- Sidebar ---------- */
+.lb-sidebar {
+  width: 280px; min-width: 240px; background:#fff; border:1px solid #e5e7eb;
+  border-radius: 12px; padding:14px; height: calc(100vh - 120px);
+  position: sticky; top: 64px; overflow: auto;
+}
+.lb-sidebar-title { font-weight: 800; margin: 2px 2px 12px; }
+.lb-gallery { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+
+/* Portrait tiles; show full image (no crop) */
+.lb-thumb {
+  border: 1px solid #e5e7eb; border-radius: 12px; background:#fff;
+  box-shadow: 0 1px 0 rgba(0,0,0,.02); cursor: grab;
+  transition: box-shadow .15s ease, transform .08s ease; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  aspect-ratio: 3 / 4; padding: 6px;
+}
+.lb-thumb:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+.lb-thumb.dragging { box-shadow: 0 10px 30px rgba(0,0,0,.12); z-index: 1000; }
+.lb-thumb img {
+  max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain;
+  display:block; background:#f3f4f6; border-radius:8px;
+}
+.lb-thumb .lb-name { display:none; font-size:12px; padding:6px; text-align:center; color:#555; }
+.lb-sidebar.sidebar-open { overflow: visible; }
+
+/* ---------- Canvas pages ---------- */
+.lb-pages { display:flex; flex-direction:column; gap:24px; padding:16px; align-items:center; }
+
+.page {
+  width: 900px; aspect-ratio: 1 / 1.4142; /* A4 */ background:#fff; position:relative;
+  box-shadow: 0 8px 30px rgba(0,0,0,.08); border-radius: 6px; overflow: hidden;
+}
+.page.selected { outline: 2px solid #111; }
+.page-inner  { position:absolute; inset:0; }
+.page-canvas { position:absolute; inset: var(--safe); }
+.page-safe   { position:absolute; inset: var(--safe); border:1px dashed #e5e7eb; pointer-events:none; }
+.page.dz-over .page-safe { border-color:#111; border-style:solid; }
+
+/* ---------- Blocks ---------- */
+.lb-block { position:absolute; border:1px solid transparent; box-sizing:border-box; }
+.lb-block.selected { border-color:#111; }
+.lb-block:focus, .lb-block:focus-visible { outline:none; }
+.lb-block, .lb-text { user-select:none; }
+
+.lb-img { width:100%; height:100%; object-fit:contain; object-position:50% 50%; display:block; }
+.lb-block.pan-mode { cursor:grab; }
+
+.lb-text { width:100%; height:100%; padding:10px; font-size:22px; font-weight:700; white-space:pre-wrap; outline:none; }
+
+/* hide UI while exporting; keeps page size/layout intact */
+.export-mode .lb-topbar,
+.export-mode .lb-footer,
+.export-mode .lb-sidebar,
+.export-mode .lb-help { display: none !important; }
+.export-mode .lb-main { padding: 0 !important; }
+.export-mode .lb-pages { gap: 0 !important; padding: 0 !important; }
+.export-mode .page { box-shadow: none !important; border-radius: 0 !important; }
+
+
+/* ---------- Print ---------- */
+@media print {
+  body { background:#fff; }
+  .lb-topbar, .lb-help, .lb-footer, .lb-sidebar { display:none !important; }
+  .lb-main { display:block; padding:0; }
+  .lb-pages { gap:0; padding:0; }
+  .page { width:auto; aspect-ratio:auto; box-shadow:none; border-radius:0; page-break-after:always; }
+  .page:last-child { page-break-after:auto; }
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SOGNI Lookbook</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="./lookbook.css" />
+
+    <!-- Interact.js (drag/resize) -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/interactjs@1.10.17/dist/interact.min.js"
+    ></script>
+
+    <!-- html2pdf bundle (includes jsPDF + html2canvas) -->
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <!-- Templates and app -->
+    <script defer src="./templates.js"></script>
+    <script defer src="../wardrobe.js"></script>
+    <script defer src="./lookbook.js"></script>
+  </head>
+
+  <body class="lb-body">
+    <header class="lb-topbar">
+      <div class="lb-title">SOGNI LOOKBOOK</div>
+      <div class="lb-actions">
+        <select
+          id="templateSelect"
+          class="lb-select"
+          title="Apply a template to the selected page"
+        >
+          <option value="">Apply Template to Page…</option>
+          <option value="cover">Cover</option>
+          <option value="grid3">Grid ×3</option>
+          <option value="full">Full Bleed</option>
+        </select>
+        <button id="addBlank" class="lb-btn" title="Add a blank page">
+          + Blank
+        </button>
+        <button id="deletePage" class="lb-btn" title="Delete selected page">
+          Delete Page
+        </button>
+        <button id="exportPdf" class="lb-btn lb-primary" title="Export as PDF">
+          Export PDF
+        </button>
+      </div>
+    </header>
+
+    <main class="lb-main">
+      <aside class="lb-sidebar">
+        <div class="lb-sidebar-title">Wardrobe</div>
+        <div id="lb-gallery" class="lb-gallery"></div>
+      </aside>
+
+      <section class="lb-stage">
+        <div class="lb-help">
+          Drag items from the left onto a page (inside the dotted margin). Click
+          empty space to deselect. Alt/Option + drag on an image to pan. Press
+          <kbd>Delete</kbd>/<kbd>Backspace</kbd> to remove the selected block.
+        </div>
+        <div id="pages" class="lb-pages"></div>
+      </section>
+    </main>
+
+    <footer class="lb-footer">
+      Autosaves to your browser (localStorage). No server changes.
+    </footer>
+
+    <noscript
+      ><div style="padding: 12px">This tool requires JavaScript.</div></noscript
+    >
+  </body>
+</html>
