@@ -39,7 +39,7 @@ const STYLE_PROMPTS = {
     'professional business-casual: blouse or button-up shirt tucked in, tailored slacks or knee/midi skirt, loafers or block heels, light knit or blazer layer, subtle jewelry, neutral palette (black, white, beige, navy), ironed and office-appropriate',
 
   Streetwear:
-    'urban streetwear: oversized hoodie or graphic tee, wide-leg cargo or denim, chunky sneakers, baseball cap or beanie, chain necklace, crossbody or mini backpack, monochrome or dark base with one pop colour (red, neon, pastel)',
+    'urban streetwear: oversized hoodie or graphic tee, wide-leg parachute pants or denim, chunky sneakers, baseball cap or beanie, chain necklace, crossbody or mini backpack, monochrome or dark base with one pop colour (red, neon, pastel)',
 
   Preppy:
     'contemporary preppy: polo or striped knit, pleated skirt or chinos, loafers or boat shoes, layered cardigan or blazer, clean collar, simple jewelry, navy/cream/forest/burgundy palette, collegiate polish',

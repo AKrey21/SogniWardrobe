@@ -169,6 +169,7 @@ function garmentSpecification(itemText, style) {
     // Bottoms
     'jeans': 'denim pants with proper fit, belt loops, pockets, and appropriate length',
     'baggy jeans': 'extra-loose denim pants with very relaxed fit from waist to ankle, wide straight legs that do not taper, pooling slightly over shoes. Streetwear silhouette inspired by 90s hip-hop and skate culture. Denim should visibly hang away from thighs and calves, NOT slim or fitted.',
+    'extreme baggy jeans': 'oversized denim pants with exaggerated width, ultra-loose from thigh to ankle, heavy stacking over sneakers, inspired by 2000s rap and rave fashion.',
     'jorts': 'denim shorts ABOVE the knee, casual fit, may be loose or slightly baggy, with visible stitching and hem or frayed edges',
     'cargo pants': 'loose straight-leg pants with multiple utility pockets on thighs and sides, casual streetwear style',
     'parachute pants': 'lightweight baggy pants with drawstring waist and adjustable ankle hems, balloon-like silhouette',
@@ -178,7 +179,7 @@ function garmentSpecification(itemText, style) {
     'shorts': 'knee-length or above-knee casual bottoms, made of cotton or polyester',
     'bermuda shorts': 'loose straight-cut shorts that end just above the knee, casual menswear staple',
     'pleated tennis skirt': 'short high-waisted skirt with uniform pleats, sporty and feminine style',
-    'mini skirt': 'short skirt ending mid-thigh, various fits and fabrics',
+    'denim mini skirt': 'low-rise denim mini skirt ending mid-thigh, fitted at the hips with slight flare or straight cut. Features Y2K aesthetics: frayed hems, faded or acid-wash denim, visible stitching, sometimes with small side slits or pleats. Styled to pair with crop tops, baby tees, or chunky sneakers/boots for a nostalgic early-2000s vibe.',
 
     // Dresses & One-Pieces
     'dress': 'one-piece garment with proper length and fit for the specified style',

@@ -12,6 +12,7 @@ function buildPrompt({
   const statureLine = statureDescriptor(heightCm, gender);
   const styleLine = STYLE_PROMPTS[style] || style;
 
+  
   // Enhanced framing with more specific requirements
   const framing =
     'MANDATORY FULL BODY SHOT: Complete head-to-toe visibility showing entire body from head to feet, all clothing items fully visible including shoes and accessories. ' +

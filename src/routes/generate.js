@@ -143,47 +143,101 @@ router.post('/generate', async (req, res) => {
     ].filter(Boolean).join(', ');
 
     const model  = process.env.SOGNI_MODEL_ID || process.env.SOGNI_MODEL || 'flux1-schnell-fp8';
-    const steps  = Number(process.env.SOGNI_STEPS || 12); // Increased for better quality and prompt following
+    const steps  = Number(process.env.SOGNI_STEPS || 15);
     const width  = Number(process.env.SOGNI_WIDTH || 768);
-    const height = Number(process.env.SOGNI_HEIGHT || 1152); // Better ratio for full body
-    const guidance = Number(process.env.SOGNI_GUIDANCE || 3.5); // Higher guidance for better prompt adherence
-
-    console.log('Generated prompt:', prompt);
-    console.log('Negative prompt:', negativePrompt);
-
-    const project = await sogni.projects.create({
+    const height = Number(process.env.SOGNI_HEIGHT || 1152);
+    const guidance = Number(process.env.SOGNI_GUIDANCE || 2.5);
+    
+    // Add variation through different seeds and slightly different parameters per image
+    const baseProject = {
       tokenType:'spark',
       modelId: model,
       positivePrompt: prompt,
       negativePrompt,
       stylePrompt: '',
       steps,
-      guidance, // Use variable guidance
+      guidance,
       numberOfImages: n,
       scheduler:'Euler',
       timeStepSpacing:'Linear',
       sizePreset:'custom',
       width, height
-    });
+    };
 
-    const images = await project.waitForCompletion();
+    // For better variation, you could also try different schedulers randomly
+    const schedulers = ['Euler', 'DPM++ 2M Karras', 'DDIM'];
+    const randomScheduler = schedulers[Math.floor(Math.random() * schedulers.length)];
+    baseProject.scheduler = randomScheduler;
 
-    if (!images || !images.length) {
-      return res.status(422).json({ 
-        error: 'No images generated (possibly blocked by safety filters). Try rephrasing or adjusting parameters.' 
+    console.log('Generated prompt:', prompt);
+    console.log('Negative prompt:', negativePrompt);
+
+    // Advanced variation strategy: Generate multiple different prompts for better diversity
+    if (n > 1 && process.env.ENABLE_PROMPT_VARIATION === 'true') {
+      // Generate each image with slightly different prompts for maximum variation
+      const images = [];
+      
+      for (let i = 0; i < n; i++) {
+        const variedPrompt = buildPrompt({ 
+          gender: g, style: s, itemText: item, 
+          heightCm, weightKg, race, complexion 
+        });
+        
+        const singleProject = await sogni.projects.create({
+          ...baseProject,
+          positivePrompt: variedPrompt,
+          numberOfImages: 1
+        });
+        
+        const singleImages = await singleProject.waitForCompletion();
+        if (singleImages && singleImages.length > 0) {
+          images.push(...singleImages);
+        }
+        
+        // Small delay to ensure different random seeds
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      if (!images || !images.length) {
+        return res.status(422).json({ 
+          error: 'No images generated (possibly blocked by safety filters). Try rephrasing or adjusting parameters.' 
+        });
+      }
+
+      res.json({
+        images: images.slice(0, n),
+        meta: {
+          prompt: 'Multiple varied prompts used',
+          negativePrompt,
+          gender: g, style: s, itemText: item, batch: n,
+          heightCm, weightKg, race, complexion,
+          modelParams: { steps, guidance, width, height },
+          variationMode: 'individual_prompts'
+        }
+      });
+    } else {
+      // Standard single prompt generation
+      const project = await sogni.projects.create(baseProject);
+      const images = await project.waitForCompletion();
+
+      if (!images || !images.length) {
+        return res.status(422).json({ 
+          error: 'No images generated (possibly blocked by safety filters). Try rephrasing or adjusting parameters.' 
+        });
+      }
+
+      res.json({
+        images: images.slice(0, n),
+        meta: {
+          prompt,
+          negativePrompt,
+          gender: g, style: s, itemText: item, batch: n,
+          heightCm, weightKg, race, complexion,
+          modelParams: { steps, guidance, width, height },
+          variationMode: 'single_prompt'
+        }
       });
     }
-
-    res.json({
-      images: images.slice(0, n),
-      meta: {
-        prompt,
-        negativePrompt,
-        gender: g, style: s, itemText: item, batch: n,
-        heightCm, weightKg, race, complexion,
-        modelParams: { steps, guidance, width, height }
-      }
-    });
   } catch (err) {
     console.error('Generation error:', err);
     if (err?.payload?.errorCode === 107) {
