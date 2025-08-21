@@ -1,223 +1,377 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sogni Wardrobe — Web</title>
   <link rel="icon" href="data:," />
-
-  <!-- Tailwind (CDN) -->
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
-          colors: { brand:'#22d3ee', accent:'#a78bfa', welcomePurple:'#5923B1' },
-          boxShadow: { card: '0 10px 30px rgba(0,0,0,0.35)' },
-          borderRadius: { '2xl': '1rem' }
+          colors: {
+            brand: '#6366f1',
+            accent: '#a78bfa',
+            welcomePurple: '#5923B1',
+            dark: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+              950: '#020617'
+            }
+          },
+          fontFamily: {
+            'display': ['Inter', 'system-ui', 'sans-serif'],
+            'body': ['Inter', 'system-ui', 'sans-serif']
+          },
+          boxShadow: {
+            'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+            'glow': '0 0 20px rgba(99, 102, 241, 0.3)',
+            'card-hover': '0 20px 40px rgba(0, 0, 0, 0.4)'
+          },
+          backdropBlur: {
+            'xs': '2px',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.8s ease-out',
+            'slide-up': 'slideUp 0.6s ease-out',
+            'pulse-glow': 'pulseGlow 2s infinite'
+          }
         }
       }
     }
   </script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./styles.css">
 </head>
 
-<body class="min-h-screen text-neutral-100 bg-gradient-to-b from-black to-[#5923B1] font-sans">
-
+<body class="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950 text-white font-body overflow-x-hidden">
+  
   <!-- Welcome Screen -->
-  <div id="welcome-screen"
-       class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-black to-[#5923B1] transition-opacity duration-1000">
-    <div class="text-center px-6">
-      <h2 class="text-2xl md:text-4xl font-bold mb-2">WELCOME TO</h2>
-      <h1 class="text-4xl md:text-6xl font-bold mb-8">SOGNI WARDROBE</h1>
+  <div id="welcome-screen" class="welcome-overlay">
+    <div class="welcome-content">
+      <div class="text-center space-y-6">
+        <div class="welcome-text">
+          <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light tracking-wider opacity-80 mb-4">WELCOME TO</h2>
+          <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold bg-gradient-to-r from-white via-accent to-brand bg-clip-text text-transparent animate-fade-in">
+            SOGNI WARDROBE
+          </h1>
+        </div>
+        <div class="flex items-center justify-center space-x-4">
+          <div class="w-12 h-px bg-gradient-to-r from-transparent to-accent"></div>
+          <div class="w-2 h-2 bg-accent rounded-full animate-pulse-glow"></div>
+          <div class="w-12 h-px bg-gradient-to-l from-transparent to-accent"></div>
+        </div>
+      </div>
     </div>
-    <div class="absolute bottom-5 left-5 text-sm md:text-base">NTU X Base</div>
-    <div class="absolute bottom-5 right-5 text-sm md:text-base">VIBECODERS</div>
+    
+    <div class="absolute bottom-8 left-8 text-sm font-medium text-white/60 tracking-wider">
+      NTU X Base
+    </div>
+    <div class="absolute bottom-8 right-8 text-sm font-medium text-white/60 tracking-wider">
+      VIBECODERS
+    </div>
   </div>
 
   <!-- Main Application -->
-  <div id="main-app" class="hidden p-4 sm:p-5">
+  <div id="main-app" class="hidden min-h-screen">
     <!-- Header -->
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
-      <h1 class="m-0 [font-size:clamp(18px,3vw,28px)] tracking-wide font-semibold">
-        Sogni Wardrobe
-        <span class="ml-2 text-[10px] sm:text-xs text-neutral-300 bg-neutral-800/80 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full ring-1 ring-white/10">web beta</span>
-      </h1>
-      <div class="inline-flex self-start sm:self-auto items-center gap-2 text-xs ring-1 ring-white/10 px-3 py-1.5 rounded-full bg-neutral-900/70">
-        stylist demo
+    <header class="sticky top-0 z-40 backdrop-blur-xl bg-dark-950/80 border-b border-white/10">
+      <div class="container mx-auto px-4 sm:px-6 py-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center space-x-4">
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">
+              Sogni Wardrobe
+            </h1>
+            <span class="px-3 py-1 text-xs font-medium bg-gradient-to-r from-brand/20 to-accent/20 border border-brand/30 rounded-full backdrop-blur-sm">
+              web beta
+            </span>
+          </div>
+          <div class="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-dark-800/50 to-dark-700/50 border border-white/10 rounded-full backdrop-blur-sm">
+            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span class="text-sm font-medium">stylist demo</span>
+          </div>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <!-- Wardrobe Layout -->
-    <div class="grid gap-4 max-w-[1400px] mx-auto grid-cols-1 lg:grid-cols-[1fr_1.2fr_1fr]">
-      <!-- Left Panel -->
-      <div class="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-card p-4 sm:p-5 h-auto md:h-[75vh] md:overflow-y-auto">
-        <div class="grid gap-4">
-          <!-- 1. Input mode -->
-          <div>
-            <label class="block mb-1.5 text-sm text-neutral-300">1. Choose Your Input Method</label>
-            <div class="grid grid-cols-2 gap-2 p-1 rounded-xl ring-1 ring-neutral-800 bg-neutral-950">
-              <input id="mode-text" name="input_mode" type="radio" class="peer/mtext hidden" checked>
-              <label for="mode-text"
-                     class="text-center px-3 py-2 rounded-lg cursor-pointer text-sm text-neutral-400
-                            peer-checked/mtext:bg-neutral-800 peer-checked/mtext:text-neutral-100">
-                Describe Item
-              </label>
-
-              <input id="mode-image" name="input_mode" type="radio" class="peer/mimg hidden">
-              <label for="mode-image"
-                     class="text-center px-3 py-2 rounded-lg cursor-pointer text-sm text-neutral-400
-                            peer-checked/mimg:bg-neutral-800 peer-checked/mimg:text-neutral-100">
-                Upload Photos
-              </label>
-            </div>
-          </div>
-
-          <!-- Text mode -->
-          <div id="text-input-container" class="grid gap-3">
-            <label for="item" class="block text-sm text-neutral-300">Item to style</label>
-            <input id="item" type="text" placeholder='e.g., "baby tee"'
-                   class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 placeholder:text-neutral-500 focus:outline-none focus:ring-brand/60" />
-          </div>
-
-          <!-- Image mode -->
-          <div id="image-input-container" class="hidden grid gap-3">
-            <div class="flex items-center justify-between">
-              <label for="image-upload" class="block text-sm text-neutral-300">Upload photos of your items</label>
-              <button id="clear-images-btn" class="px-2.5 py-1 rounded-lg bg-neutral-800 ring-1 ring-neutral-700 text-xs">Clear All</button>
-            </div>
-
-            <label for="image-upload"
-                   class="w-full border-2 border-dashed border-neutral-800 rounded-xl p-4 text-center cursor-pointer hover:bg-neutral-900/40 hover:border-neutral-600 transition">
-              <span id="upload-text" class="text-sm text-neutral-400">Tap to add up to 5 images</span>
-              <div id="image-preview-container" class="mt-2 flex flex-wrap gap-2 justify-center"></div>
-            </label>
-            <input type="file" id="image-upload" accept="image/*" multiple class="hidden" />
-          </div>
-
-          <!-- 2. Persona + style -->
-          <div>
-            <label class="block mb-1.5 text-sm text-neutral-300">2. Describe yourself & the desired style</label>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label for="gender" class="block mb-1.5 text-sm text-neutral-400">Gender</label>
-                <select id="gender" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
-                  <option>Male</option><option>Female</option><option>Unisex</option>
-                </select>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 py-8">
+      <div class="grid gap-8 max-w-7xl mx-auto lg:grid-cols-12">
+        
+        <!-- Control Panel -->
+        <div class="lg:col-span-4">
+          <div class="glass-panel h-fit">
+            <div class="p-6 space-y-8">
+              <!-- Input Method Selection -->
+              <div class="space-y-4">
+                <label class="block text-sm font-semibold text-white/90 tracking-wide">
+                  1. Choose Input Method
+                </label>
+                <div class="input-toggle-container">
+                  <input id="mode-text" name="input_mode" type="radio" class="peer/text sr-only" checked>
+                  <label for="mode-text" class="input-toggle peer-checked/text:input-toggle-active">
+                    <span>📝</span>
+                    Describe Item
+                  </label>
+                  
+                  <input id="mode-image" name="input_mode" type="radio" class="peer/image sr-only">
+                  <label for="mode-image" class="input-toggle peer-checked/image:input-toggle-active">
+                    <span>📷</span>
+                    Upload Photos
+                  </label>
+                </div>
               </div>
-              <div>
-                <label for="race" class="block mb-1.5 text-sm text-neutral-400">Race (SG)</label>
-                <select id="race" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
-                  <option>Chinese</option><option>Malay</option><option>Indian</option><option>Eurasian</option><option>Other</option>
-                </select>
+
+              <!-- Text Input -->
+              <div id="text-input-container" class="space-y-4 animate-slide-up">
+                <label for="item" class="block text-sm font-medium text-white/80">
+                  Item to style
+                </label>
+                <input 
+                  id="item" 
+                  type="text" 
+                  placeholder='e.g., "baby tee", "vintage denim jacket"'
+                  class="modern-input"
+                />
               </div>
-              <div>
-                <label for="complexion" class="block mb-1.5 text-sm text-neutral-400">Complexion</label>
-                <select id="complexion" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
-                  <option>Fair</option><option>Light-medium</option><option>Medium</option><option>Tan</option><option>Deep</option>
-                </select>
+
+              <!-- Image Input -->
+              <div id="image-input-container" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                  <label class="block text-sm font-medium text-white/80">
+                    Upload photos of your items
+                  </label>
+                  <button id="clear-images-btn" class="btn-secondary text-xs">
+                    Clear All
+                  </button>
+                </div>
+                
+                <label for="image-upload" class="upload-area">
+                  <div class="upload-content">
+                    <div class="upload-icon">📸</div>
+                    <span id="upload-text" class="upload-text">Tap to add up to 5 images</span>
+                  </div>
+                  <div id="image-preview-container" class="image-preview-grid"></div>
+                </label>
+                <input type="file" id="image-upload" accept="image/*" multiple class="sr-only" />
+              </div>
+
+              <!-- Personal Info -->
+              <div class="space-y-6">
+                <label class="block text-sm font-semibold text-white/90 tracking-wide">
+                  2. Personal Details & Style
+                </label>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div class="form-group">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select id="gender" class="modern-select">
+                      <option>Male</option>
+                      <option>Female</option>
+                      <option>Unisex</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="race" class="form-label">Race (SG)</label>
+                    <select id="race" class="modern-select">
+                      <option>Chinese</option>
+                      <option>Malay</option>
+                      <option>Indian</option>
+                      <option>Eurasian</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="complexion" class="form-label">Complexion</label>
+                    <select id="complexion" class="modern-select">
+                      <option>Fair</option>
+                      <option>Light-medium</option>
+                      <option>Medium</option>
+                      <option>Tan</option>
+                      <option>Deep</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label for="height" class="form-label">Height (cm)</label>
+                    <input 
+                      id="height" 
+                      type="number" 
+                      min="140" 
+                      max="210" 
+                      placeholder="165"
+                      class="modern-input"
+                    />
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="weight" class="form-label">Weight (kg)</label>
+                    <input 
+                      id="weight" 
+                      type="number" 
+                      min="35" 
+                      max="160" 
+                      placeholder="60"
+                      class="modern-input"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="style" class="form-label">Style Preference</label>
+                  <select id="style" class="modern-select">
+                    <option>Formal</option>
+                    <option>Casual</option>
+                    <option>Business Casual</option>
+                    <option>Streetwear</option>
+                    <option>Minimal</option>
+                    <option>Bohemian</option>
+                    <option>Cottagecore</option>
+                    <option>Dark Academia</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Items Checklist (Hidden Initially) -->
+              <div id="items-checklist-container" class="hidden space-y-4">
+                <label class="block text-sm font-semibold text-white/90">
+                  3. Edit & Select Items
+                </label>
+                <div id="items-checklist" class="items-checklist"></div>
+              </div>
+
+              <!-- Generation Settings -->
+              <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label for="batch" class="form-label">Photos per run</label>
+                    <select id="batch" class="modern-select">
+                      <option>1</option>
+                      <option selected>3</option>
+                      <option>4</option>
+                      <option>6</option>
+                    </select>
+                  </div>
+                  <div class="flex items-end">
+                    <p class="text-xs text-white/60 leading-tight">
+                      Uses Sogni's <span class="font-mono text-accent">spark</span> tokens
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-col sm:flex-row gap-3">
+                <button id="go" class="btn-primary flex-1 relative overflow-hidden">
+                  <span class="relative z-10">Generate</span>
+                  <div class="absolute inset-0 bg-gradient-to-r from-brand to-accent opacity-0 transition-opacity duration-300 hover:opacity-100"></div>
+                </button>
+                
+                <button id="regen" class="btn-secondary">
+                  <span>🔄</span>
+                  Regenerate
+                </button>
+                
+                <div id="loading" class="hidden flex items-center justify-center">
+                  <div class="loading-spinner"></div>
+                </div>
+              </div>
+
+              <!-- Status -->
+              <p id="status" class="text-sm text-white/70 font-medium min-h-[1.25rem]"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="lg:col-span-5">
+          <div class="glass-panel h-fit min-h-[600px]">
+            <div class="p-6">
+              <!-- Decorative Header -->
+              <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-3">
+                  <div class="w-2 h-2 bg-gradient-to-r from-brand to-accent rounded-full"></div>
+                  <h3 class="text-lg font-semibold text-white/90 tracking-wide">Generation Results</h3>
+                </div>
+                <div class="hidden md:flex items-center space-x-2">
+                  <div class="w-8 h-px bg-gradient-to-r from-transparent to-accent/50"></div>
+                  <div class="w-1 h-1 bg-accent/60 rounded-full"></div>
+                  <div class="w-1 h-1 bg-accent/40 rounded-full"></div>
+                  <div class="w-1 h-1 bg-accent/20 rounded-full"></div>
+                </div>
+              </div>
+
+              <!-- Results Grid -->
+              <div id="images" class="results-grid"></div>
+              
+              <!-- Empty State -->
+              <div class="empty-state">
+                <div class="empty-state-icon">✨</div>
+                <p class="empty-state-text">Your styled looks will appear here</p>
+                <p class="empty-state-subtext">Configure your preferences and click Generate to start</p>
               </div>
             </div>
           </div>
+        </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label for="height" class="block mb-1.5 text-sm text-neutral-400">Height (cm)</label>
-              <input id="height" type="number" min="140" max="210" placeholder="e.g., 165"
-                     class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 placeholder:text-neutral-500 focus:outline-none focus:ring-brand/60" />
+        <!-- Wardrobe Panel -->
+        <div class="lg:col-span-3">
+          <div class="glass-panel h-fit">
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-white/90 tracking-wide">Personal Lookbook</h3>
+                <button id="view-wardrobe" class="text-accent hover:text-white transition-colors text-sm font-medium">
+                  View All
+                </button>
+              </div>
+              
+              <div id="wardrobe-grid" class="wardrobe-grid">
+                <!-- Placeholder items -->
+                <div class="wardrobe-placeholder">
+                  <div class="placeholder-icon">👗</div>
+                </div>
+                <div class="wardrobe-placeholder">
+                  <div class="placeholder-icon">👔</div>
+                </div>
+                <div class="wardrobe-placeholder">
+                  <div class="placeholder-icon">👕</div>
+                </div>
+                <div class="wardrobe-placeholder">
+                  <div class="placeholder-icon">👖</div>
+                </div>
+              </div>
+              
+              <p class="text-xs text-white/50 mt-4 text-center">
+                Save your favorite looks by clicking the ♡ button
+              </p>
             </div>
-            <div>
-              <label for="weight" class="block mb-1.5 text-sm text-neutral-400">Weight (kg)</label>
-              <input id="weight" type="number" min="35" max="160" placeholder="e.g., 60"
-                     class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 placeholder:text-neutral-500 focus:outline-none focus:ring-brand/60" />
-            </div>
           </div>
-
-          <div>
-            <label for="style" class="block mb-1.5 text-sm text-neutral-400">Style</label>
-            <select id="style" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
-              <option>Formal</option><option>Casual</option><option>Business Casual</option>
-              <option>Streetwear</option><option>Minimal</option>
-              <option>Bohemian</option><option>Cottagecore</option>
-              <option>Dark Academia</option>
-            </select>
-          </div>
-
-          <!-- 3. Items checklist (shown after analyze) -->
-          <div id="items-checklist-container" class="hidden">
-            <label class="block mb-1.5 text-sm text-neutral-400">3. Edit item names then select to include</label>
-            <div id="items-checklist" class="flex flex-col gap-2 rounded-xl bg-neutral-950 ring-1 ring-neutral-800 p-3"></div>
-          </div>
-
-          <!-- Photos per run -->
-          <div class="grid gap-2 md:grid-cols-[auto,1fr] md:items-end">
-            <div>
-              <label for="batch" class="block mb-1.5 text-sm text-neutral-400">Photos per run</label>
-              <select id="batch" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
-                <option>1</option><option selected>3</option><option>4</option><option>6</option>
-              </select>
-            </div>
-            <p class="text-xs text-neutral-400 leading-snug md:pl-2">
-              Uses Sogni's <span class="font-mono text-neutral-300">spark</span> tokens.
-            </p>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <button id="go" class="w-full sm:w-auto bg-gradient-to-r from-black to-[#5923B1] px-4 py-2 rounded-xl font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed">
-              Generate
-            </button>
-            <button id="regen" class="w-full sm:w-auto px-4 py-2 rounded-xl font-medium bg-neutral-800 text-neutral-200 ring-1 ring-neutral-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-              Regenerate
-            </button>
-            <div id="loading" class="hidden sm:ml-1.5 h-5 w-5 self-center rounded-full border-2 border-neutral-600 border-t-transparent animate-spin" aria-label="Loading"></div>
-          </div>
-
-          <p id="status" class="text-sm text-neutral-300"></p>
         </div>
+
       </div>
-
-      <!-- Middle Panel -->
-      <div class="relative bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-card p-4 sm:p-5 h-auto md:h-[75vh] md:overflow-y-auto">
-        <!-- Decorative rail (hide on mobile) -->
-        <div class="hidden md:block">
-          <div class="absolute top-2 left-0 right-0 h-[15px] rounded-lg shadow-[0_3px_10px_rgba(0,0,0,0.5)] bg-gradient-to-b from-purple-900/70 to-fuchsia-700/70"></div>
-          <div class="absolute top-[25px] left-[10%] right-[10%] h-px bg-white/10"></div>
-          <div class="absolute top-[25px] left-[20%] w-5 h-5 bg-slate-300/80 rounded-full -translate-x-1/2 shadow">
-            <div class="absolute top-5 left-1/2 -translate-x-1/2 w-0.5 h-4 bg-slate-300/80"></div>
-          </div>
-          <div class="absolute top-[25px] left-[50%] w-5 h-5 bg-slate-300/80 rounded-full -translate-x-1/2 shadow">
-            <div class="absolute top-5 left-1/2 -translate-x-1/2 w-0.5 h-4 bg-slate-300/80"></div>
-          </div>
-          <div class="absolute top-[25px] left-[80%] w-5 h-5 bg-slate-300/80 rounded-full -translate-x-1/2 shadow">
-            <div class="absolute top-5 left-1/2 -translate-x-1/2 w-0.5 h-4 bg-slate-300/80"></div>
-          </div>
-        </div>
-
-        <div class="mt-2 md:mt-10 flex items-center justify-between">
-          <div class="text-sm text-neutral-300">Results</div>
-        </div>
-
-        <!-- Results grid -->
-        <div id="images" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 mt-4 md:mt-10"></div>
-      </div>
-
-      <!-- Right Panel -->
-      <div class="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-card p-4 sm:p-5 h-auto md:h-[75vh] md:overflow-y-auto">
-        <div class="flex items-center justify-between mb-3 sm:mb-4">
-          <div class="text-sm text-neutral-300">PERSONAL LOOKBOOK</div>
-        </div>
-        <div id="wardrobe-grid" class="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-2 sm:mt-4">
-          <div class="aspect-[3/4] bg-white/5 rounded-lg grid place-items-center text-neutral-400/60 text-sm">XX</div>
-          <div class="aspect-[3/4] bg-white/5 rounded-lg grid place-items-center text-neutral-400/60 text-sm">XX</div>
-          <div class="aspect-[3/4] bg-white/5 rounded-lg grid place-items-center text-neutral-400/60 text-sm">XX</div>
-          <div class="aspect-[3/4] bg-white/5 rounded-lg grid place-items-center text-neutral-400/60 text-sm">XX</div>
-        </div>
-      </div>
-    </div>
+    </main>
   </div>
 
-  <!-- Upload preview helpers -->
+  <!-- Scripts -->
   <script defer>
+    // Upload preview functionality
     window.stagedFiles = [];
     const imageUploadInput = document.getElementById('image-upload');
     const previewContainer = document.getElementById('image-preview-container');
@@ -239,13 +393,13 @@
           const reader = new FileReader();
           reader.onload = (e) => {
             const wrap = document.createElement('div');
-            wrap.className = 'relative inline-block';
+            wrap.className = 'image-preview-item';
             const img = document.createElement('img');
             img.src = e.target.result;
-            img.className = 'w-20 h-20 rounded-lg ring-1 ring-neutral-700 object-cover'; /* fixed */
-            const del = document.createElement('span');
-            del.className = 'absolute -top-1 -right-1 w-5 h-5 bg-black/70 text-white border border-white rounded-full flex items-center justify-center text-xs font-bold cursor-pointer';
-            del.innerHTML = '&times;';
+            img.className = 'preview-image';
+            const del = document.createElement('button');
+            del.className = 'preview-remove';
+            del.innerHTML = '×';
             del.dataset.index = index;
             del.addEventListener('click', (ev) => {
               ev.preventDefault(); ev.stopPropagation();
@@ -267,7 +421,7 @@
       const newFiles = Array.from(event.target.files);
       newFiles.forEach((file) => { if (!isDuplicate(file)) window.stagedFiles.push(file); });
       if (window.stagedFiles.length > 5) {
-        alert('Max 5 images.');
+        alert('Maximum 5 images allowed.');
         window.stagedFiles = window.stagedFiles.slice(0, 5);
       }
       renderPreviews();
@@ -279,21 +433,51 @@
       renderPreviews();
       document.dispatchEvent(new Event('clear'));
     });
-  </script>
 
-  <!-- Welcome screen fade -->
-  <script defer>
+    // Welcome screen transition
     document.addEventListener('DOMContentLoaded', () => {
       const welcome = document.getElementById('welcome-screen');
       const app = document.getElementById('main-app');
       setTimeout(() => {
         welcome.classList.add('opacity-0');
-        setTimeout(() => { welcome.classList.add('hidden'); app.classList.remove('hidden'); }, 1000);
-      }, 2000);
+        setTimeout(() => { 
+          welcome.classList.add('hidden'); 
+          app.classList.remove('hidden');
+          app.classList.add('animate-fade-in');
+        }, 1000);
+      }, 2500);
+    });
+
+    // Mode switching
+    const modeTextRadio = document.getElementById('mode-text');
+    const modeImageRadio = document.getElementById('mode-image');
+    const textContainer = document.getElementById('text-input-container');
+    const imageContainer = document.getElementById('image-input-container');
+
+    modeTextRadio?.addEventListener('change', () => {
+      if (modeTextRadio.checked) {
+        textContainer?.classList.remove('hidden');
+        imageContainer?.classList.add('hidden');
+      }
+    });
+
+    modeImageRadio?.addEventListener('change', () => {
+      if (modeImageRadio.checked) {
+        textContainer?.classList.add('hidden');
+        imageContainer?.classList.remove('hidden');
+      }
+    });
+
+    // Show empty state initially
+    document.addEventListener('DOMContentLoaded', () => {
+      const imagesContainer = document.getElementById('images');
+      if (imagesContainer && imagesContainer.children.length === 0) {
+        imagesContainer.parentElement.querySelector('.empty-state')?.classList.remove('hidden');
+      }
     });
   </script>
 
-  <!-- App scripts -->
+  <!-- Include existing app scripts -->
   <script src="./app.js" defer></script>
   <script src="./wardrobe.js" defer></script>
   <script defer>
