@@ -5,11 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sogni Wardrobe — Web</title>
   <link rel="icon" href="data:," />
-  
-  <!-- Inter Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,281 +12,49 @@
     tailwind.config = {
       theme: {
         extend: {
-          colors: { 
-            brand: '#22d3ee', 
-            accent: '#a78bfa',
-            welcomePurple: '#5923B1',
-            error: '#ef4444'
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
+          colors: { brand:'#22d3ee', accent:'#a78bfa', welcomePurple:'#5923B1' },
+          boxShadow: { card: '0 10px 30px rgba(0,0,0,0.35)' },
+          borderRadius: { '2xl': '1rem' }
         }
       }
     }
   </script>
-  <style>
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; visibility: hidden; }
-    }
-    
-    .fade-out {
-      animation: fadeOut 1s ease-in-out forwards;
-    }
-    
-    .welcome-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(to bottom, #000000, #5923B1);
-      z-index: 50;
-      font-family: 'Inter', sans-serif;
-    }
-    
-    .gradient-bg {
-      background: linear-gradient(to bottom, #000000, #5923B1);
-      font-family: 'Inter', sans-serif;
-    }
-    
-    .generate-btn {
-      background: linear-gradient(to right, #000000, #5923B1);
-    }
-    
-    .wardrobe-design {
-      display: grid;
-      grid-template-columns: 1fr 1.2fr 1fr;
-      gap: 16px;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    
-    .wardrobe-panel {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-      padding: 20px;
-      height: 80vh;
-      overflow-y: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-    
-    .wardrobe-panel::-webkit-scrollbar {
-      display: none;
-    }
-    
-    .lookbook-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 15px;
-    }
-    
-    .lookbook-item {
-      aspect-ratio: 3/4;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: rgba(255, 255, 255, 0.3);
-      font-size: 14px;
-    }
-    
-    body::-webkit-scrollbar {
-      display: none;
-    }
-    
-    body {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    
-    /* Wardrobe railing styles */
-    .wardrobe-railing {
-      position: relative;
-      min-height: 100%;
-      padding-top: 30px;
-    }
-    
-    .wardrobe-railing::before {
-      content: '';
-      position: absolute;
-      top: 10px;
-      left: 0;
-      right: 0;
-      height: 15px;
-      background: linear-gradient(to bottom, 
-        rgba(55, 10, 81, 0.7) 0%, 
-        rgba(82, 15, 120, 0.7) 30%,
-        rgba(154, 29, 227, 0.7) 60%,
-        rgba(142, 26, 209, 0.7) 100%);
-      border-radius: 8px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
-    }
-    
-    .wardrobe-railing::after {
-      content: '';
-      position: absolute;
-      top: 25px;
-      left: 10%;
-      right: 10%;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .hanger {
-      position: absolute;
-      top: 25px;
-      width: 20px;
-      height: 20px;
-      background: rgba(192, 192, 192, 0.8);
-      border-radius: 50%;
-      transform: translateX(-50%);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      z-index: 2;
-    }
-    
-    .hanger::after {
-      content: '';
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      width: 2px;
-      height: 15px;
-      background: rgba(192, 192, 192, 0.8);
-      transform: translateX(-50%);
-    }
-    
-    .hanger-1 { left: 20%; }
-    .hanger-2 { left: 50%; }
-    .hanger-3 { left: 80%; }
-    
-    .results-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-top: 40px;
-    }
-    
-    .result-item {
-      aspect-ratio: 2/3;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: rgba(255, 255, 255, 0.2);
-      font-size: 14px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .result-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, rgba(255,255,255,0.05) 0%, transparent 100%);
-    }
-    
-    /* Error message styling */
-    .error-message {
-      background-color: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 15px;
-      font-size: 14px;
-      display: flex;
-      align-items: flex-start;
-    }
-    
-    .error-icon {
-      margin-right: 10px;
-      font-size: 16px;
-    }
-    
-    .retry-btn {
-      background: rgba(239, 68, 68, 0.2);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      padding: 6px 12px;
-      border-radius: 6px;
-      margin-top: 10px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
-    
-    .retry-btn:hover {
-      background: rgba(239, 68, 68, 0.3);
-    }
-  </style>
 </head>
 
-<body class="min-h-screen text-neutral-100 gradient-bg font-sans">
+<body class="min-h-screen text-neutral-100 bg-gradient-to-b from-black to-[#5923B1] font-sans">
 
   <!-- Welcome Screen -->
-  <div id="welcome-screen" class="welcome-screen">
-    <div class="text-center">
-      <h2 class="text-2xl md:text-4xl font-bold text-white mb-2">WELCOME TO</h2>
-      <h1 class="text-4xl md:text-6xl font-bold text-white mb-8">SOGNI WARDROBE</h1>
+  <div id="welcome-screen"
+       class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-black to-[#5923B1] transition-opacity duration-1000">
+    <div class="text-center px-6">
+      <h2 class="text-2xl md:text-4xl font-bold mb-2">WELCOME TO</h2>
+      <h1 class="text-4xl md:text-6xl font-bold mb-8">SOGNI WARDROBE</h1>
     </div>
-    
-    <!-- Bottom left text -->
-    <div class="absolute bottom-5 left-5 text-white text-sm md:text-base">
-      NTU X Base
-    </div>
-    
-    <!-- Bottom right text -->
-    <div class="absolute bottom-5 right-5 text-white text-sm md:text-base">
-      VIBECODERS
-    </div>
+    <div class="absolute bottom-5 left-5 text-sm md:text-base">NTU X Base</div>
+    <div class="absolute bottom-5 right-5 text-sm md:text-base">VIBECODERS</div>
   </div>
 
-  <!-- Main Application (initially hidden) -->
-  <div id="main-app" class="hidden p-5">
+  <!-- Main Application -->
+  <div id="main-app" class="hidden p-4 sm:p-5">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div class="text-center">
-        <h1 class="m-0 text-[clamp(18px,3vw,28px)] tracking-wide font-semibold inline-block">
-          Sogni Wardrobe
-          <span class="ml-2 text-xs text-neutral-400 bg-neutral-800/80 px-2.5 py-1 rounded-full ring-1 ring-white/10">web beta</span>
-        </h1>
-      </div>
-      
-      <!-- Right aligned demo badge -->
-      <div class="inline-flex items-center gap-2 text-xs ring-1 ring-white/10 px-3 py-1.5 rounded-full bg-neutral-900/70">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+      <h1 class="m-0 [font-size:clamp(18px,3vw,28px)] tracking-wide font-semibold">
+        Sogni Wardrobe
+        <span class="ml-2 text-[10px] sm:text-xs text-neutral-300 bg-neutral-800/80 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full ring-1 ring-white/10">web beta</span>
+      </h1>
+      <div class="inline-flex self-start sm:self-auto items-center gap-2 text-xs ring-1 ring-white/10 px-3 py-1.5 rounded-full bg-neutral-900/70">
         stylist demo
       </div>
     </div>
 
-    <!-- Error message container (initially hidden) -->
-    <div id="error-container" class="hidden mb-4">
-      <!-- Error messages will be inserted here -->
-    </div>
-
-    <!-- Wardrobe Design Layout -->
-    <div class="wardrobe-design">
-      <!-- Left Panel - Controls -->
-      <div class="wardrobe-panel">
+    <!-- Wardrobe Layout -->
+    <div class="grid gap-4 max-w-[1400px] mx-auto grid-cols-1 lg:grid-cols-[1fr_1.2fr_1fr]">
+      <!-- Left Panel -->
+      <div class="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-card p-4 sm:p-5 h-auto md:h-[75vh] md:overflow-y-auto">
         <div class="grid gap-4">
-          <!-- 1. Input mode toggle -->
+          <!-- 1. Input mode -->
           <div>
-            <label class="block mb-1.5 text-sm text-neutral-400">1. Choose Your Input Method</label>
+            <label class="block mb-1.5 text-sm text-neutral-300">1. Choose Your Input Method</label>
             <div class="grid grid-cols-2 gap-2 p-1 rounded-xl ring-1 ring-neutral-800 bg-neutral-950">
               <input id="mode-text" name="input_mode" type="radio" class="peer/mtext hidden" checked>
               <label for="mode-text"
@@ -311,7 +74,7 @@
 
           <!-- Text mode -->
           <div id="text-input-container" class="grid gap-3">
-            <label for="item" class="block text-sm text-neutral-400">Item to style</label>
+            <label for="item" class="block text-sm text-neutral-300">Item to style</label>
             <input id="item" type="text" placeholder='e.g., "baby tee"'
                    class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 placeholder:text-neutral-500 focus:outline-none focus:ring-brand/60" />
           </div>
@@ -319,18 +82,13 @@
           <!-- Image mode -->
           <div id="image-input-container" class="hidden grid gap-3">
             <div class="flex items-center justify-between">
-              <label for="image-upload" class="block text-sm text-neutral-400">Upload photos of your items</label>
-              <button id="clear-images-btn"
-                      class="px-2.5 py-1 rounded-lg bg-neutral-800 ring-1 ring-neutral-700 text-xs">
-                Clear All
-              </button>
+              <label for="image-upload" class="block text-sm text-neutral-300">Upload photos of your items</label>
+              <button id="clear-images-btn" class="px-2.5 py-1 rounded-lg bg-neutral-800 ring-1 ring-neutral-700 text-xs">Clear All</button>
             </div>
 
-            <!-- Clickable upload area -->
             <label for="image-upload"
-                   class="w-full border-2 border-dashed border-neutral-800 rounded-xl p-4 text-center cursor-pointer
-                          hover:bg-neutral-900/40 hover:border-neutral-600 transition">
-              <span id="upload-text" class="text-sm text-neutral-400">Click to add up to 5 images</span>
+                   class="w-full border-2 border-dashed border-neutral-800 rounded-xl p-4 text-center cursor-pointer hover:bg-neutral-900/40 hover:border-neutral-600 transition">
+              <span id="upload-text" class="text-sm text-neutral-400">Tap to add up to 5 images</span>
               <div id="image-preview-container" class="mt-2 flex flex-wrap gap-2 justify-center"></div>
             </label>
             <input type="file" id="image-upload" accept="image/*" multiple class="hidden" />
@@ -338,7 +96,7 @@
 
           <!-- 2. Persona + style -->
           <div>
-            <label class="block mb-1.5 text-sm text-neutral-400">2. Describe yourself & the desired style</label>
+            <label class="block mb-1.5 text-sm text-neutral-300">2. Describe yourself & the desired style</label>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label for="gender" class="block mb-1.5 text-sm text-neutral-400">Gender</label>
@@ -377,83 +135,89 @@
           <div>
             <label for="style" class="block mb-1.5 text-sm text-neutral-400">Style</label>
             <select id="style" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
-              <option>Formal</option><option>Casual</option><option>Smart Casual</option><option>Business Casual</option>
-              <option>Streetwear</option><option>Preppy</option><option>Minimal</option><option>Vintage</option>
-              <option>Workwear</option><option>Techwear</option><option>Grunge</option><option>Skater</option>
-              <option>Bohemian</option><option>Festival</option><option>Y2K</option><option>Cottagecore</option>
-              <option>Dark Academia</option><option>Gorpcore</option>
+              <option>Formal</option><option>Casual</option><option>Business Casual</option>
+              <option>Streetwear</option><option>Minimal</option>
+              <option>Bohemian</option><option>Cottagecore</option>
+              <option>Dark Academia</option>
             </select>
           </div>
 
           <!-- 3. Items checklist (shown after analyze) -->
           <div id="items-checklist-container" class="hidden">
-            <label class="block mb-1.5 text-sm text-neutral-400">3. Edit item names if needed, then select items to include</label>
+            <label class="block mb-1.5 text-sm text-neutral-400">3. Edit item names then select to include</label>
             <div id="items-checklist" class="flex flex-col gap-2 rounded-xl bg-neutral-950 ring-1 ring-neutral-800 p-3"></div>
           </div>
 
           <!-- Photos per run -->
-          <div class="grid gap-2 lg:grid-cols-[auto,1fr] lg:items-end">
+          <div class="grid gap-2 md:grid-cols-[auto,1fr] md:items-end">
             <div>
               <label for="batch" class="block mb-1.5 text-sm text-neutral-400">Photos per run</label>
               <select id="batch" class="w-full px-3 py-2.5 rounded-xl bg-neutral-950 text-neutral-100 ring-1 ring-neutral-800 focus:outline-none focus:ring-brand/60">
                 <option>1</option><option selected>3</option><option>4</option><option>6</option>
               </select>
             </div>
-            <p class="text-xs text-neutral-400 leading-snug lg:pl-2">
+            <p class="text-xs text-neutral-400 leading-snug md:pl-2">
               Uses Sogni's <span class="font-mono text-neutral-300">spark</span> tokens.
             </p>
           </div>
 
           <!-- Actions -->
-          <div class="flex items-center gap-2">
-            <button id="go"
-              class="generate-btn px-4 py-2 rounded-xl font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <button id="go" class="w-full sm:w-auto bg-gradient-to-r from-black to-[#5923B1] px-4 py-2 rounded-xl font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed">
               Generate
             </button>
-            <button id="regen"
-              class="px-4 py-2 rounded-xl font-medium bg-neutral-800 text-neutral-200 ring-1 ring-neutral-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <button id="regen" class="w-full sm:w-auto px-4 py-2 rounded-xl font-medium bg-neutral-800 text-neutral-200 ring-1 ring-neutral-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
               Regenerate
             </button>
-            <div id="loading"
-              class="hidden ml-1.5 h-5 w-5 rounded-full border-2 border-neutral-600 border-t-transparent animate-spin"
-              aria-label="Loading"></div>
+            <div id="loading" class="hidden sm:ml-1.5 h-5 w-5 self-center rounded-full border-2 border-neutral-600 border-t-transparent animate-spin" aria-label="Loading"></div>
           </div>
 
-          <p id="status" class="text-sm text-neutral-400"></p>
+          <p id="status" class="text-sm text-neutral-300"></p>
         </div>
       </div>
 
-      <!-- Middle Panel - Generated Results with Wardrobe Railing -->
-      <div class="wardrobe-panel">
-        <div class="wardrobe-railing">
-          <div class="hanger hanger-1"></div>
-          <div class="hanger hanger-2"></div>
-          <div class="hanger hanger-3"></div>
-          
-          <div class="flex items-center justify-between mb-4" style="margin-top: 30px;">
-            <div class="text-sm text-neutral-400">Results</div>
+      <!-- Middle Panel -->
+      <div class="relative bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-card p-4 sm:p-5 h-auto md:h-[75vh] md:overflow-y-auto">
+        <!-- Decorative rail (hide on mobile) -->
+        <div class="hidden md:block">
+          <div class="absolute top-2 left-0 right-0 h-[15px] rounded-lg shadow-[0_3px_10px_rgba(0,0,0,0.5)] bg-gradient-to-b from-purple-900/70 to-fuchsia-700/70"></div>
+          <div class="absolute top-[25px] left-[10%] right-[10%] h-px bg-white/10"></div>
+          <div class="absolute top-[25px] left-[20%] w-5 h-5 bg-slate-300/80 rounded-full -translate-x-1/2 shadow">
+            <div class="absolute top-5 left-1/2 -translate-x-1/2 w-0.5 h-4 bg-slate-300/80"></div>
+          </div>
+          <div class="absolute top-[25px] left-[50%] w-5 h-5 bg-slate-300/80 rounded-full -translate-x-1/2 shadow">
+            <div class="absolute top-5 left-1/2 -translate-x-1/2 w-0.5 h-4 bg-slate-300/80"></div>
+          </div>
+          <div class="absolute top-[25px] left-[80%] w-5 h-5 bg-slate-300/80 rounded-full -translate-x-1/2 shadow">
+            <div class="absolute top-5 left-1/2 -translate-x-1/2 w-0.5 h-4 bg-slate-300/80"></div>
           </div>
         </div>
+
+        <div class="mt-2 md:mt-10 flex items-center justify-between">
+          <div class="text-sm text-neutral-300">Results</div>
+        </div>
+
+        <!-- Results grid -->
+        <div id="images" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 mt-4 md:mt-10"></div>
       </div>
 
-      <!-- Right Panel - Personal Lookbook -->
-      <div class="wardrobe-panel">
-        <div class="flex items-center justify-between mb-4">
-          <div class="text-sm text-neutral-400">PERSONAL LOOKBOOK</div>
+      <!-- Right Panel -->
+      <div class="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-card p-4 sm:p-5 h-auto md:h-[75vh] md:overflow-y-auto">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
+          <div class="text-sm text-neutral-300">PERSONAL LOOKBOOK</div>
         </div>
-        <div class="lookbook-grid" id="wardrobe-grid">
-          <!-- Placeholder items -->
-          <div class="lookbook-item">XX</div>
-          <div class="lookbook-item">XX</div>
-          <div class="lookbook-item">XX</div>
-          <div class="lookbook-item">XX</div>
+        <div id="wardrobe-grid" class="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-2 sm:mt-4">
+          <div class="aspect-[3/4] bg-white/5 rounded-lg grid place-items-center text-neutral-400/60 text-sm">XX</div>
+          <div class="aspect-[3/4] bg-white/5 rounded-lg grid place-items-center text-neutral-400/60 text-sm">XX</div>
+          <div class="aspect-[3/4] bg-white/5 rounded-lg grid place-items-center text-neutral-400/60 text-sm">XX</div>
+          <div class="aspect-[3/4] bg-white/5 rounded-lg grid place-items-center text-neutral-400/60 text-sm">XX</div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Upload preview helpers -->
-  <script>
+  <script defer>
     window.stagedFiles = [];
     const imageUploadInput = document.getElementById('image-upload');
     const previewContainer = document.getElementById('image-preview-container');
@@ -467,6 +231,7 @@
     }
 
     function renderPreviews() {
+      if (!previewContainer || !uploadText) return;
       previewContainer.innerHTML = '';
       if (window.stagedFiles.length > 0) {
         uploadText.textContent = `${window.stagedFiles.length} image(s) selected`;
@@ -477,9 +242,9 @@
             wrap.className = 'relative inline-block';
             const img = document.createElement('img');
             img.src = e.target.result;
-            img.className = 'max-w-20 max-h-20 rounded-lg ring-1 ring-neutral-700 object-cover';
+            img.className = 'w-20 h-20 rounded-lg ring-1 ring-neutral-700 object-cover'; /* fixed */
             const del = document.createElement('span');
-            del.className = 'absolute -top-1 -right-1 w-5 h-5 bg-black/70 text-white border border-white rounded-full flex items-center justify-center text-xs font-bold cursor-pointer hover:bg-red-500';
+            del.className = 'absolute -top-1 -right-1 w-5 h-5 bg-black/70 text-white border border-white rounded-full flex items-center justify-center text-xs font-bold cursor-pointer';
             del.innerHTML = '&times;';
             del.dataset.index = index;
             del.addEventListener('click', (ev) => {
@@ -494,7 +259,7 @@
           reader.readAsDataURL(file);
         });
       } else {
-        uploadText.textContent = 'Click to add up to 5 images';
+        uploadText.textContent = 'Tap to add up to 5 images';
       }
     }
 
@@ -502,7 +267,7 @@
       const newFiles = Array.from(event.target.files);
       newFiles.forEach((file) => { if (!isDuplicate(file)) window.stagedFiles.push(file); });
       if (window.stagedFiles.length > 5) {
-        alert('You can upload a maximum of 5 images. The extras have been removed.');
+        alert('Max 5 images.');
         window.stagedFiles = window.stagedFiles.slice(0, 5);
       }
       renderPreviews();
@@ -516,154 +281,25 @@
     });
   </script>
 
-  <!-- Welcome screen animation script -->
-  <script>
+  <!-- Welcome screen fade -->
+  <script defer>
     document.addEventListener('DOMContentLoaded', () => {
-      const welcomeScreen = document.getElementById('welcome-screen');
-      const mainApp = document.getElementById('main-app');
-      
-      // Show welcome screen for 2 seconds, then fade out and show main app
+      const welcome = document.getElementById('welcome-screen');
+      const app = document.getElementById('main-app');
       setTimeout(() => {
-        welcomeScreen.classList.add('fade-out');
-        
-        // After fade animation completes, show main app
-        setTimeout(() => {
-          welcomeScreen.style.display = 'none';
-          mainApp.classList.remove('hidden');
-        }, 1000);
+        welcome.classList.add('opacity-0');
+        setTimeout(() => { welcome.classList.add('hidden'); app.classList.remove('hidden'); }, 1000);
       }, 2000);
     });
   </script>
 
-  <!-- Enhanced error handling and generation simulation -->
-  <script>
-    // DOM elements
-    const goButton = document.getElementById('go');
-    const regenButton = document.getElementById('regen');
-    const loadingIndicator = document.getElementById('loading');
-    const statusText = document.getElementById('status');
-    const errorContainer = document.getElementById('error-container');
-    const imagesContainer = document.getElementById('images');
-
-    // Error display function
-    function showError(message, isRetryable = true) {
-      errorContainer.innerHTML = `
-        <div class="error-message">
-          <span class="error-icon">⚠️</span>
-          <div>
-            <div><strong>Server Error</strong></div>
-            <div>${message}</div>
-            ${isRetryable ? '<button class="retry-btn" onclick="retryGeneration()">Try Again</button>' : ''}
-          </div>
-        </div>
-      `;
-      errorContainer.classList.remove('hidden');
-      
-      // Scroll to error message
-      errorContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    // Clear errors
-    function clearErrors() {
-      errorContainer.classList.add('hidden');
-      errorContainer.innerHTML = '';
-    }
-
-    // Simulate generation with potential failure
-    function simulateGeneration() {
-      clearErrors();
-      loadingIndicator.classList.remove('hidden');
-      goButton.disabled = true;
-      regenButton.disabled = true;
-      statusText.textContent = 'Generating styles...';
-      
-      // Clear previous results
-      imagesContainer.innerHTML = '';
-      
-      // Simulate API call with random chance of failure
-      const shouldFail = Math.random() > 0.7; // 30% chance of failure
-      
-      setTimeout(() => {
-        if (shouldFail) {
-          // Simulate server error
-          handleGenerationError();
-        } else {
-          // Simulate success
-          handleGenerationSuccess();
-        }
-      }, 2500);
-    }
-
-    // Handle generation success
-    function handleGenerationSuccess() {
-      loadingIndicator.classList.add('hidden');
-      goButton.disabled = false;
-      regenButton.disabled = false;
-      statusText.textContent = 'Generation complete!';
-      
-      // Add sample generated images
-      const sampleImages = [
-        'Generated look 1',
-        'Generated look 2', 
-        'Generated look 3',
-        'Generated look 4'
-      ];
-      
-      sampleImages.forEach(text => {
-        const item = document.createElement('div');
-        item.className = 'result-item';
-        item.textContent = text;
-        imagesContainer.appendChild(item);
-      });
-    }
-
-    // Handle generation error
-    function handleGenerationError() {
-      loadingIndicator.classList.add('hidden');
-      goButton.disabled = false;
-      regenButton.disabled = false;
-      statusText.textContent = 'Generation failed';
-      
-      // Show appropriate error message
-      const errorMessages = [
-        "Server is temporarily unavailable. Please try again in a moment.",
-        "Connection timeout. Please check your internet connection and try again.",
-        "Processing error. Our team has been notified and is working on a fix.",
-        "Server overloaded. Please try again in a few minutes."
-      ];
-      
-      const randomError = errorMessages[Math.floor(Math.random() * errorMessages.length)];
-      showError(randomError);
-    }
-
-    // Retry function
-    function retryGeneration() {
-      clearErrors();
-      simulateGeneration();
-    }
-
-    // Event listeners
-    goButton.addEventListener('click', simulateGeneration);
-    regenButton.addEventListener('click', simulateGeneration);
-  </script>
-
-  <!-- Scripts -->
-  <script src="./app.js"></script>
-  <script src="./wardrobe.js"></script>
-  <script>
-    // Boot Wardrobe grid & buttons
-    Wardrobe.mountGrid(document.getElementById('wardrobe-grid'));
-    document.getElementById('clear-wardrobe')?.addEventListener('click', () => {
-      Wardrobe.getAll().forEach(url => Wardrobe.remove(url));
-    });
-    // View all (if provided by wardrobe.js slideshow, else it will no-op)
-    document.getElementById('view-wardrobe')?.addEventListener('click', () => {
-      if (Wardrobe.viewAll) Wardrobe.viewAll();
-      else {
-        const urls = Wardrobe.getAll();
-        if (urls.length === 0) alert('No saved looks yet.');
-        else window.Lightbox?.open(urls[0]);
-      }
+  <!-- App scripts -->
+  <script src="./app.js" defer></script>
+  <script src="./wardrobe.js" defer></script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', () => {
+      const grid = document.getElementById('wardrobe-grid');
+      if (window.Wardrobe?.mountGrid && grid) window.Wardrobe.mountGrid(grid);
     });
   </script>
 </body>

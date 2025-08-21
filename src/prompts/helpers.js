@@ -227,7 +227,8 @@ function garmentSpecification(itemText, style) {
     }
   }
   
-  return `"${itemText}" garment worn appropriately for ${style} styling with proper fit and realistic appearance`;
+  // Default spec: explicitly "worn by the model", not floating
+  return `"${itemText}" garment worn by the model (not floating, not on a mannequin), appropriate for ${style} styling with proper fit and realistic appearance`;
 }
 
 module.exports = {
