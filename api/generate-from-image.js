@@ -7,14 +7,9 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-app.options("*", cors(), (_req, res) => res.sendStatus(204));
+// Mount at /api so /api/generate-from-image hits router's path
+app.use("/api", router);
 
-// Rewrite "/" → "/generate-from-image"
-app.use((req, _res, next) => {
-  if (req.url === "/" || req.url === "") req.url = "/generate-from-image";
-  next();
-});
-
-app.use("/", router);
+app.use((req, _res, next) => { console.log("[/api/generate-from-image] hit:", req.method, req.url); next(); });
 
 module.exports = (req, res) => app(req, res);
