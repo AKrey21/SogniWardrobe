@@ -250,7 +250,6 @@ PORT=3000
 - Deliverables: 5‑min demo, pitch deck, public repo.  
   _Placeholders:_
   - Demo video: `https://www.youtube.com/watch?v=ffiowr_zu98&feature=youtu.be`
-  - Pitch deck: `https://www.canva.com/design/DAGww7ZmdY8/n73ZVXIowmytokhrAF970A/edit?utm_content=DAGww7ZmdY8&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton`
 
 ---
 
