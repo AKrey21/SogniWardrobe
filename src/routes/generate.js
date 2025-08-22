@@ -1,8 +1,10 @@
+// src/routes/generate.js
 const express = require('express');
 const { GENDERS, STYLES, DEFAULT_BATCH, NEGATIVE_PROMPT, RACE_LABELS } = require('../prompts/constants');
 const { garmentSpecification } = require('../prompts/helpers');
 const { buildPrompt } = require('../prompts/buildPrompt');
 const { getSogniClient } = require('../sogni/client');
+const { withSogniLock } = require('../sogni/lock');
 
 const router = express.Router();
 
@@ -14,8 +16,20 @@ router.options('/generate', (req, res) => {
   res.status(204).end();
 });
 
+/* ---------- Per-user/IP simple in-flight guard ---------- */
+const inflight = new Map();
+const keyFromReq = (req) =>
+  (req.headers['x-user-id'] || req.headers['x-forwarded-for'] || req.ip || 'global').toString();
+
 /* ---------------------- Image generation API ---------------------- */
 router.post('/generate', async (req, res) => {
+  const key = keyFromReq(req);
+  if (inflight.has(key)) {
+    res.setHeader('Retry-After', '5');
+    return res.status(429).json({ error: 'Another generation is still running. Please wait a few seconds and try again.' });
+  }
+  inflight.set(key, true);
+
   try {
     const { gender, style, itemText, batch, heightCm, weightKg, race, complexion } = req.body || {};
 
@@ -28,7 +42,7 @@ router.post('/generate', async (req, res) => {
     if (!STYLES.includes(s))  return res.status(400).json({ error: 'Invalid style',  allowed: STYLES  });
     if (!item)               return res.status(400).json({ error: 'itemText is required' });
 
-    const sogni = await getSogniClient();                 // ✅ declared once
+    const sogni = await getSogniClient();
     if (!sogni) return res.status(503).json({ error: 'Sogni not connected yet. Try again.' });
 
     const prompt = buildPrompt({ gender: g, style: s, itemText: item, heightCm, weightKg, race, complexion });
@@ -102,7 +116,7 @@ router.post('/generate', async (req, res) => {
       return `not ${otherStyles.join(' style, not ')} style`;
     })();
 
-    const garmentSpec = garmentSpecification(item, s); // kept (if referenced elsewhere)
+    const garmentSpec = garmentSpecification(item, s);
     const garmentNegatives = (() => {
       const itemLower = item.toLowerCase();
       const negatives = ['distorted clothing, malformed garments, unrealistic fabric behavior'];
@@ -129,22 +143,21 @@ router.post('/generate', async (req, res) => {
     const height   = Number(process.env.SOGNI_HEIGHT   || 1152);
     const guidance = Number(process.env.SOGNI_GUIDANCE || 3.5);
 
-    const project = await sogni.projects.create({
-      tokenType: 'spark',
-      modelId: model,
-      positivePrompt: prompt,
-      negativePrompt,
-      stylePrompt: '',
-      steps,
-      guidance,
-      numberOfImages: n,
-      scheduler: 'Euler',
-      timeStepSpacing: 'Linear',
-      sizePreset: 'custom',
-      width, height
+    // 🔒 Serialize Sogni job to prevent concurrency-triggered 500s
+    const images = await withSogniLock(async () => {
+      const project = await sogni.projects.create({
+        tokenType: 'spark',
+        modelId: model,
+        positivePrompt: prompt,
+        negativePrompt,
+        stylePrompt: '',
+        steps, guidance, numberOfImages: n,
+        scheduler: 'Euler', timeStepSpacing: 'Linear',
+        sizePreset: 'custom', width, height
+      });
+      return project.waitForCompletion();
     });
 
-    const images = await project.waitForCompletion();
     if (!images || !images.length) {
       return res.status(422).json({ error: 'No images generated (possibly blocked by safety filters). Try rephrasing or adjusting parameters.' });
     }
@@ -154,10 +167,14 @@ router.post('/generate', async (req, res) => {
       meta: { prompt, negativePrompt, gender: g, style: s, itemText: item, batch: n, heightCm, weightKg, race, complexion, modelParams: { steps, guidance, width, height } }
     });
   } catch (err) {
-    console.error('Generation error:', err);
+    console.error('GENERATION_ERROR', {
+      message: err?.message, code: err?.payload?.errorCode, payload: err?.payload, stack: err?.stack
+    });
     if (err?.payload?.errorCode === 107) return res.status(401).json({ error: 'Auth failed for Sogni credentials (error 107).' });
     if (String(err?.message || '').includes('Insufficient funds')) return res.status(402).json({ error: 'Insufficient credits/funds on Sogni.' });
     res.status(500).json({ error: 'Server error while generating.' });
+  } finally {
+    inflight.delete(key);
   }
 });
 
