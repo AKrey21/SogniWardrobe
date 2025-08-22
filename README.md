@@ -3,25 +3,24 @@
 > **Wardrobe Closet** — save, organize, and compare generated outfits.  
 > Built for the **NTU × Sogni Hackathon (2025)**.
 
-Generate lookbook-style outfit images using the Sogni SDK.  
+Generate lookbook‑style outfit images using the Sogni SDK.  
 Frontend lives in `public/`. Backend (Express API + prompts + Sogni client) lives in `src/`.
 
 ---
 
 ## ✨ Features
 
-- **Text-to-Lookbook generation** via Sogni (username/password — no API key).
-- **Image-to-Image**: generate new looks from a reference image.
-- **Garment focus**: call out a key item (e.g., “long baggy denim jorts”).
+- **Text‑to‑Lookbook generation** via Sogni (username/password — no API key).
+- **Style presets** (extendable): Casual, Streetwear, Y2K, Office, Techwear, etc.
+- **Garment focus**: keep a key item (e.g., “long baggy denim jorts”) centered in the fit.
 - **Body/complexion aware phrasing**: optional `heightCm`, `weightKg`, `race`, `complexion`.
-- **Color-lock negatives** to avoid color drift (e.g., white → ivory).
+- **Color‑lock negatives** to avoid color drift (e.g., white → ivory).
 - **Batch generation** with gallery grid.
-- **Click-to-select & Regenerate**: re-roll only the images you select.
+- **Click‑to‑select & Regenerate**: re‑roll only the images you select.
 - **Wardrobe UI**: tile layout with selection highlight and a “closet reveal” animation.
-- **(Optional) Outfit analysis** (Gemini): extract items/labels from an image.
 - **Ops**: `GET /heartbeat` healthcheck.
 
-> **Roadmap**: persistent wardrobes, shareable links, CDN storage.
+> **Roadmap**: persistent wardrobes, image‑to‑image, shareable links, CDN storage.
 
 ---
 
@@ -48,40 +47,32 @@ npm start     # node src/server.js
 
 ---
 
-## 🗂️ Project Structure (Actual)
+## 🗂️ Project Structure
 
 ```
 project-root/
 ├─ public/
-│  ├─ images/
-│  │  └─ Sogni.png
-│  ├─ app.js
 │  ├─ index.html
+│  ├─ app.js
+│  ├─ wardrobe.js
 │  ├─ styles.css
-│  └─ wardrobe.js
+│  └─ images/
 ├─ src/
-│  ├─ api/
-│  │  └─ index.js
-│  ├─ index.js
-│  ├─ prompts/
-│  │  ├─ buildPrompt.js
-│  │  ├─ constants.js
-│  │  └─ helpers.js
+│  ├─ server.js
 │  ├─ routes/
-│  │  ├─ analyzeltems.js        # (note the filename as-is)
-│  │  ├─ generate.js
-│  │  └─ generateFromImage.js
-│  ├─ services/
-│  │  └─ gemini.js
+│  │  └─ generate.js
+│  ├─ prompts/
+│  │  ├─ constants.js
+│  │  ├─ helpers.js
+│  │  └─ buildPrompt.js
 │  ├─ sogni/
 │  │  └─ client.js
-│  └─ server.js
+│  ├─ services/
+│  └─ api/
 ├─ .env
 ├─ package.json
 └─ README.md
 ```
-
-> If you see the `analyzeltems.js` filename odd: it’s spelled that way in the repo and referenced accordingly. Keep the same spelling in imports.
 
 ---
 
@@ -89,58 +80,83 @@ project-root/
 
 ### Frontend — `public/`
 
-- **`public/index.html`** — HTML shell of the app (form/select fields, results grid). Loads Tailwind (if used), `app.js`, `wardrobe.js`, and `styles.css`.
-- **`public/app.js`** — Handles user inputs; POSTs to backend endpoints; renders the returned images and meta. Also wires up click‑to‑select and regenerate flows.
-- **`public/wardrobe.js`** — Wardrobe UX: tile selection states, highlight animation, and any “closet reveal” once a generation completes.
-- **`public/styles.css`** — Custom styles layered over Tailwind (or plain CSS).
-- **`public/images/Sogni.png`** — Branding/placeholder asset used by the UI.
+- **`public/index.html`**
+  - The HTML shell of the app (form fields, dropdowns, results grid).
+  - Loads Tailwind (if used), `app.js`, `wardrobe.js`, and `styles.css`.
+  - Served at `GET /` by Express.
+
+- **`public/app.js`**
+  - Handles user input (gender, style, garment, batch, optional height/weight/race/complexion).
+  - Calls the backend: `POST /api/generate` with a JSON payload.
+  - Renders returned images to the gallery and prints prompt metadata (optional).
+
+- **`public/wardrobe.js`**
+  - Manages **Wardrobe** UX: tile selection, highlight animation, and **click‑to‑regenerate** flow.
+  - Provides any “closet reveal” animation after generation completes.
+
+- **`public/styles.css`**
+  - Custom styles layered over Tailwind (or plain CSS if you prefer).
+  - Keep component‑specific rules minimal; prefer utility classes.
+
+- **`public/images/`**
+  - Static assets (icons, placeholders, backgrounds).
 
 ### Backend — `src/`
 
-- **`src/server.js`** — Express bootstrap:
-  - Loads env (`dotenv`), serves static `/public`, sets JSON middleware.
-  - Mounts routes for `/api/generate`, `/api/generate-from-image`, `/api/analyze-items` (see below).
+- **`src/server.js`**
+  - Loads environment variables (`dotenv`).
+  - Sets up Express (`express.json()`, static serving of `/public`).
   - Exposes `GET /heartbeat` for ops.
-  - Initializes the Sogni client on startup.
+  - Mounts API routes (e.g., `POST /api/generate`).
+  - Establishes the Sogni connection on startup (via `sogni/client.js`).
 
-- **`src/sogni/client.js`** — Sogni SDK bootstrap and helpers:
-  - `connectSogni()` — login/init using `SOGNI_USERNAME` / `SOGNI_PASSWORD` / `APP_ID`.
-  - `generateImages(options)` — creates generation jobs and returns images.
+- **`src/routes/generate.js`**
+  - Validates request body:
+    - `gender` (e.g., Male | Female | Unisex)
+    - `style` (e.g., Casual | Y2K | Techwear | …)
+    - `itemText` (e.g., “baby tee”, “cargo pants”)
+    - Optional: `heightCm`, `weightKg`, `race`, `complexion`, `batch`
+  - Builds `positivePrompt`/`negativePrompt` using `prompts/buildPrompt.js`.
+  - Calls Sogni to generate images; returns the image array + metadata.
+  - Handles common Sogni/validation errors and returns user‑friendly messages.
 
-- **`src/prompts/constants.js`** — Prompt constants:
-  - Lists for `GENDERS`, `STYLES`, `COMPLEXIONS`, plus `STYLE_PROMPTS`.
-  - `NEGATIVE_BASE` to discourage artifacts/wrong scenes/cropping.
-  - Color‑lock and other small prompt pieces.
+- **`src/sogni/client.js`**
+  - Creates a Sogni client using your credentials and endpoints.
+  - Exposes helpers:
+    - `connectSogni()` — connect once on server start.
+    - `generateImages(opts)` — create a generation job and await images.
 
-- **`src/prompts/helpers.js`** — Prompt helpers:
-  - `normalizeRace()`, `ethnicFeaturesFor()`, `complexionDescriptor()`,
-    `bmiDescriptor()`, `statureDescriptor()`, `garmentSpecification()`.
+- **`src/prompts/constants.js`**
+  - Lists for `GENDERS`, `STYLES`, `COMPLEXIONS`.
+  - `RACE_LABELS` tuned for SG context.
+  - `NEGATIVE_BASE` to avoid artifacts/bad scenes.
+  - `STYLE_PROMPTS` with micro‑guidance per style.
 
-- **`src/prompts/buildPrompt.js`** — Assembles the final `positivePrompt` and `negativePrompt` using constants + helpers and the request body.
+- **`src/prompts/helpers.js`**
+  - `normalizeRace()` → maps inputs to clean labels.
+  - `ethnicFeaturesFor()` → brief, respectful descriptors.
+  - `complexionDescriptor()` → consistent skin‑tone phrasing (Fitzpatrick I–VI hints).
+  - `bmiDescriptor()` / `statureDescriptor()` → soft body/stature hints (optional).
+  - `garmentSpecification()` → detail garment fit/structure when recognized.
 
-- **`src/routes/generate.js`** — **POST `/api/generate`**
-  - Validates input (`gender`, `style`, `itemText`, optional body metrics).
-  - Builds prompts and calls Sogni for **text‑to‑image** generation.
-  - Responds with `{ images: [...], meta: {...} }`.
+- **`src/prompts/buildPrompt.js`**
+  - `buildPositivePrompt()` → stitches body type, style, garment, framing, lighting.
+  - `buildNegativePrompt()` → discourages mismatches, artifacts, cropping, wrong scenes.
 
-- **`src/routes/generateFromImage.js`** — **POST `/api/generate-from-image`**
-  - For **image‑to‑image** generation. Accepts a reference image (URL or base64) plus optional style/garment fields, then calls Sogni and returns images.
+- **`src/services/`** *(optional)*
+  - For cross‑cutting utilities (logger, storage, validation) as the app grows.
 
-- **`src/routes/analyzeltems.js`** — **POST `/api/analyze-items`**
-  - (Filename kept as‑is.) Accepts an outfit image (URL or base64) and returns extracted garment labels/attributes using the Gemini service.
-  - Requires `services/gemini.js` and (optionally) `GEMINI_API_KEY` in `.env` (see below).
-
-- **`src/services/gemini.js`** — Small wrapper for Gemini (or similar) to label/describe clothing seen in an image. Central place to swap providers if needed.
-
-- **`src/api/index.js`** — Convenience module to register/compose additional API routers (kept small; for future expansion).
-
-- **`src/index.js`** — Light entry/utility module (e.g., shared exports or dev helpers).
+- **`src/api/`** *(optional)*
+  - For additional modules/endpoints (e.g., image‑to‑image, lookbook persistence).
 
 ### Root
 
-- **`.env`** — Not committed. Holds credentials & defaults (next section).
-- **`package.json`** — Dependencies and scripts (`start`, `dev`).
-- **`README.md`** — You’re reading it 🙂
+- **`.env`**
+  - Not committed. Holds credentials & defaults (see below).
+- **`package.json`**
+  - Dependencies and scripts (`start`, `dev`).
+- **`README.md`**
+  - This file 🙂
 
 ---
 
@@ -160,10 +176,6 @@ SOGNI_WIDTH=768
 SOGNI_HEIGHT=1152
 SOGNI_BATCH=3
 
-# --- (Optional) Analysis service ---
-# Required only if you call /api/analyze-items
-GEMINI_API_KEY=your_gemini_key
-
 # --- Server ---
 PORT=3000
 ```
@@ -174,7 +186,7 @@ PORT=3000
 
 ## 📡 API
 
-### 1) `POST /api/generate` — Text → Images
+### `POST /api/generate`
 
 **Request body (JSON)**
 ```json
@@ -190,55 +202,28 @@ PORT=3000
 }
 ```
 
-**Response**
+**Response (success)**
 ```json
 {
-  "images": [ {"url": "https://.../1.png", "id": "abc"} ],
-  "meta": { "positivePrompt": "...", "negativePrompt": "...", "modelParams": { "width": 768, "height": 1152, "steps": 12, "guidance": 1.5 } }
+  "images": [
+    {"url": "https://.../image1.png", "id": "abc"},
+    {"url": "https://.../image2.png", "id": "def"}
+  ],
+  "meta": {
+    "positivePrompt": "...",
+    "negativePrompt": "...",
+    "modelParams": {
+      "model": "flux1-schnell-fp8",
+      "steps": 12,
+      "guidance": 1.5,
+      "width": 768,
+      "height": 1152"
+    }
+  }
 }
 ```
 
----
-
-### 2) `POST /api/generate-from-image` — Image → Images
-
-**Request body (JSON)**
-```json
-{
-  "imageUrl": "https://example.com/reference.jpg",
-  "style": "Streetwear",
-  "itemText": "baggy denim jorts",
-  "batch": 3
-}
-```
-> You can alternatively send `imageBase64` if you prefer. The endpoint returns the same response shape as `/api/generate` with a new `images` array.
-
----
-
-### 3) `POST /api/analyze-items` — Outfit Labeling (Optional)
-
-**Request body (JSON)**
-```json
-{
-  "imageUrl": "https://example.com/outfit.jpg"
-}
-```
-**Response**
-```json
-{
-  "items": [
-    {"label":"oversized tee","color":"white","confidence":0.92},
-    {"label":"denim jorts","color":"indigo","confidence":0.88},
-    {"label":"sneakers","color":"white","confidence":0.90}
-  ]
-}
-```
-> Requires `GEMINI_API_KEY`. If missing, the route may be disabled or return a 501 with a helpful message.
-
----
-
-### Healthcheck
-
+**Healthcheck**  
 `GET /heartbeat` → `{ "ok": true }`
 
 ---
@@ -253,8 +238,24 @@ PORT=3000
 ## 🚀 Deployment Notes
 
 - Best on a **persistent Node** host (Fly.io, Railway, Render, VM).  
-  Some serverless platforms throttle WebSocket/long-lived connections used by Sogni.
+  Some serverless platforms throttle WebSocket/long‑lived connections used by Sogni.
 - Mirror all `.env` values in your hosting provider.
+
+---
+
+## 🩺 Troubleshooting
+
+- **`Error: Cannot find module 'dotenv'`**  
+  `npm i dotenv` and ensure `require('dotenv').config()` at the top of `src/server.js`.
+
+- **`Cannot find module './prompts/constants'`**  
+  Ensure `src/prompts/constants.js` exists and import paths are correct.
+
+- **Images not appearing**  
+  DevTools → Network → inspect `POST /api/generate`. If 4xx/5xx, verify `.env` and request.
+
+- **`WebSocket not connected` on serverless**  
+  Use a persistent Node host or refactor to pure‑HTTP generation.
 
 ---
 
@@ -263,9 +264,17 @@ PORT=3000
 - Built for **NTU × Sogni Hackathon (2025)** to showcase fashion idea → generated looks → curated lookbook.
 - Deliverables: 5‑min demo, pitch deck, public repo.  
   _Placeholders:_
-  - Demo video: `https://www.youtube.com/watch?v=ffiowr_zu98`
+  - Demo video: `TBD`
   - Pitch deck: `TBD`
 
 ---
 
-© 2025 Vibe Coders team.
+## 🤝 Contributing
+
+- Add/adjust styles in `prompts/constants.js` (`STYLES`, `STYLE_PROMPTS`).
+- Extend garment logic in `prompts/helpers.js` (`garmentSpecification()`).
+- Tune wording in `prompts/buildPrompt.js` without changing route logic.
+
+---
+
+© 2025 Sogni Wardrobe team.
