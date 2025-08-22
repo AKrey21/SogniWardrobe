@@ -9,12 +9,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.options("*", cors(), (_req, res) => res.sendStatus(204));
 
-// Rewrite "/" → "/analyze-items"
 app.use((req, _res, next) => {
+  if (req.url.startsWith("/api")) req.url = req.url.slice(4) || "/";
   if (req.url === "/" || req.url === "") req.url = "/analyze-items";
   next();
 });
 
 app.use("/", router);
-
 module.exports = (req, res) => app(req, res);
