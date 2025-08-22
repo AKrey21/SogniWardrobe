@@ -1,38 +1,31 @@
-// src/routes/generate.js
 const express = require("express");
-const router = express.Router();
+const cors = require("cors");
 
-const DEFAULT_URL = "https://api.sogni.ai/v1/generate"; // change if your endpoint differs
+let generateRouter;
+try {
+  generateRouter = require("../src/routes/generate"); // must exist & module.exports = router
+} catch (e) {
+  console.error("FAILED to load ../src/routes/generate:", e);
+}
 
-router.post("/generate", async (req, res) => {
-  try {
-    const apiKey = process.env.SOGNI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: "SOGNI_API_KEY missing in environment" });
-    }
+const app = express();
+app.use(cors());
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true }));
 
-    const url = process.env.SOGNI_GENERATE_URL || DEFAULT_URL;
+app.options("*", cors(), (_req, res) => res.sendStatus(204));
 
-    // Ensure we don't try to stream inside a serverless function
-    const payload = { ...(req.body || {}), stream: false };
-
-    const r = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const contentType = r.headers.get("content-type") || "application/json";
-    const text = await r.text(); // pass through exact response (json/error)
-
-    // Forward upstream status + body as-is
-    res.status(r.status).type(contentType).send(text);
-  } catch (err) {
-    res.status(500).json({ error: String(err) });
-  }
+// normalize path: strip leading /api (Vercel) and map "/" → "/generate"
+app.use((req, _res, next) => {
+  if (req.url.startsWith("/api")) req.url = req.url.slice(4) || "/";
+  if (req.url === "/" || req.url === "") req.url = "/generate";
+  next();
 });
 
-module.exports = router;
+if (!generateRouter || typeof generateRouter !== "function") {
+  app.use((_req, res) => res.status(500).json({ error: "generate router failed to load. Check path/case/module.exports." }));
+} else {
+  app.use("/", generateRouter);
+}
+
+module.exports = (req, res) => app(req, res);

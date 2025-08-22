@@ -1,35 +1,29 @@
-// src/routes/generateFromImage.js
 const express = require("express");
-const router = express.Router();
+const cors = require("cors");
 
-const DEFAULT_URL = "https://api.sogni.ai/v1/generate-from-image"; // change if different
+let router;
+try {
+  router = require("../src/routes/generateFromImage");
+} catch (e) {
+  console.error("FAILED to load ../src/routes/generateFromImage:", e);
+}
 
-router.post("/generate-from-image", async (req, res) => {
-  try {
-    const apiKey = process.env.SOGNI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: "SOGNI_API_KEY missing in environment" });
-    }
+const app = express();
+app.use(cors());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
+app.options("*", cors(), (_req, res) => res.sendStatus(204));
 
-    const url = process.env.SOGNI_GENERATE_FROM_IMAGE_URL || DEFAULT_URL;
-
-    const payload = { ...(req.body || {}), stream: false };
-
-    const r = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const contentType = r.headers.get("content-type") || "application/json";
-    const text = await r.text();
-    res.status(r.status).type(contentType).send(text);
-  } catch (err) {
-    res.status(500).json({ error: String(err) });
-  }
+app.use((req, _res, next) => {
+  if (req.url.startsWith("/api")) req.url = req.url.slice(4) || "/";
+  if (req.url === "/" || req.url === "") req.url = "/generate-from-image";
+  next();
 });
 
-module.exports = router;
+if (!router || typeof router !== "function") {
+  app.use((_req, res) => res.status(500).json({ error: "generate-from-image router failed to load. Check path/case/module.exports." }));
+} else {
+  app.use("/", router);
+}
+
+module.exports = (req, res) => app(req, res);
