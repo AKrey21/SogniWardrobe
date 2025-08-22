@@ -241,21 +241,6 @@ PORT=3000
   Some serverless platforms throttle WebSocket/long‑lived connections used by Sogni.
 - Mirror all `.env` values in your hosting provider.
 
----
-
-## 🩺 Troubleshooting
-
-- **`Error: Cannot find module 'dotenv'`**  
-  `npm i dotenv` and ensure `require('dotenv').config()` at the top of `src/server.js`.
-
-- **`Cannot find module './prompts/constants'`**  
-  Ensure `src/prompts/constants.js` exists and import paths are correct.
-
-- **Images not appearing**  
-  DevTools → Network → inspect `POST /api/generate`. If 4xx/5xx, verify `.env` and request.
-
-- **`WebSocket not connected` on serverless**  
-  Use a persistent Node host or refactor to pure‑HTTP generation.
 
 ---
 
@@ -264,16 +249,8 @@ PORT=3000
 - Built for **NTU × Sogni Hackathon (2025)** to showcase fashion idea → generated looks → curated lookbook.
 - Deliverables: 5‑min demo, pitch deck, public repo.  
   _Placeholders:_
-  - Demo video: `TBD`
-  - Pitch deck: `TBD`
-
----
-
-## 🤝 Contributing
-
-- Add/adjust styles in `prompts/constants.js` (`STYLES`, `STYLE_PROMPTS`).
-- Extend garment logic in `prompts/helpers.js` (`garmentSpecification()`).
-- Tune wording in `prompts/buildPrompt.js` without changing route logic.
+  - Demo video: `https://www.youtube.com/watch?v=ffiowr_zu98&feature=youtu.be`
+  - Pitch deck: `https://www.canva.com/design/DAGww7ZmdY8/n73ZVXIowmytokhrAF970A/edit?utm_content=DAGww7ZmdY8&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton`
 
 ---
 
