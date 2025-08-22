@@ -29,6 +29,10 @@
   let imageWorkflowState = "idle";
   let stagedFormData = null;
 
+  // NEW: track last images + a selected tile index
+  let lastImages = [];
+  let selectedIndex = null;
+
   /* ---------- Lightbox ---------- */
   const Lightbox = (() => {
     const overlay = document.createElement('div');
@@ -50,11 +54,32 @@
   })();
   window.Lightbox = Lightbox;
 
-  // Mobile-friendly: double-tap/double-click zoom
+  // Double-click to zoom (mobile-friendly)
   els.images?.addEventListener('dblclick', (e) => {
     const img = e.target.closest('img');
     if (img?.src) Lightbox.open(img.src);
   });
+
+  // NEW: selection helpers
+  function clearSelection() {
+    selectedIndex = null;
+    els.images?.querySelectorAll("[data-tile]").forEach(t => t.classList.remove("result-selected"));
+  }
+  function bindTileSelection(tile, index) {
+    tile.dataset.tile = index;
+    tile.addEventListener("click", (e) => {
+      // ignore clicks on Save button
+      if (e.target.closest(".save-btn")) return;
+      if (selectedIndex === index) {
+        tile.classList.remove("result-selected");
+        selectedIndex = null;
+      } else {
+        els.images?.querySelectorAll("[data-tile]").forEach(t => t.classList.remove("result-selected"));
+        tile.classList.add("result-selected");
+        selectedIndex = index;
+      }
+    });
+  }
 
   /* ---------- Mode switching ---------- */
   function resetImageWorkflow() {
@@ -62,6 +87,7 @@
     stagedFormData = null;
     els.itemsChecklistContainer?.classList.add("hidden");
     if (els.itemsChecklist) els.itemsChecklist.innerHTML = "";
+    clearSelection(); // clear any picked tile when switching modes
   }
   document.addEventListener("clear", resetImageWorkflow);
 
@@ -113,8 +139,10 @@
 
   function showImages(list) {
     if (!els.images) return;
+    lastImages = Array.isArray(list) ? list.slice() : [];
+    clearSelection(); // reset any existing selection
     els.images.innerHTML = "";
-    for (const url of list || []) {
+    (lastImages || []).forEach((url, i) => {
       const tile = document.createElement("div");
       tile.className = 'relative aspect-[3/4] bg-neutral-950 rounded-2xl overflow-hidden ring-1 ring-white/10';
       const img = document.createElement("img");
@@ -122,8 +150,9 @@
       img.className = 'absolute inset-0 w-full h-full object-cover';
       tile.appendChild(img);
       attachSaveButton(tile, url);
+      bindTileSelection(tile, i); // NEW: enable single-click selection per tile
       els.images.appendChild(tile);
-    }
+    });
   }
 
   /* ---------- Validations ---------- */
@@ -176,7 +205,7 @@
     } catch {}
   }
 
-  /* ---------- API: Text ---------- */
+  /* ---------- API: Text (supports targeted replace) ---------- */
   async function runTextGeneration(payload, isRegen = false) {
     setLoading(true);
     setStatus(isRegen ? "Regenerating…" : "Generating…");
@@ -188,9 +217,32 @@
       });
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(data?.error || `Generation failed (HTTP ${resp.status})`);
-      lastPayload = { ...payload }; setRegenEnabled(true);
-      showImages(data.images || []);
-      setStatus(`Done • ${payload.batch} image(s) for “${payload.itemText}”`);
+
+      lastPayload = { ...payload };
+      setRegenEnabled(true);
+
+      // If server returned exactly one image for a targeted replace, swap just that tile
+      if (payload.__replaceIndex != null && Array.isArray(data.images) && data.images.length === 1) {
+        const idx = payload.__replaceIndex;
+        const newUrl = data.images[0];
+        const tile = els.images?.querySelectorAll("[data-tile]")[idx];
+        if (tile) {
+          const img = tile.querySelector("img");
+          if (img) img.src = newUrl;
+          lastImages[idx] = newUrl;
+          tile.classList.add("result-selected");
+          selectedIndex = idx;
+          setStatus(`Done • Replaced look #${idx + 1}`);
+        } else {
+          // fallback: re-render whole grid
+          showImages(data.images || []);
+          setStatus(`Done • ${payload.batch} image(s) for “${payload.itemText}”`);
+        }
+      } else {
+        // normal path: render full batch
+        showImages(data.images || []);
+        setStatus(`Done • ${payload.batch} image(s) for “${payload.itemText}”`);
+      }
     } catch (e) {
       setStatus(e.name === "AbortError" ? "Timed out. Please try again." : e.message);
     } finally { clearTimeout(t); setLoading(false); }
@@ -255,6 +307,7 @@
       if (els.modeTextRadio?.checked) {
         lastMode = "text";
         const payload = readTextPayload(); persistProfile(payload);
+        clearSelection(); // starting a new batch clears any previous selection
         runTextGeneration(payload, false);
       } else {
         lastMode = "image";
@@ -286,7 +339,15 @@
 
   els.regen?.addEventListener("click", () => {
     if (!lastPayload || lastMode !== "text") return;
-    try { runTextGeneration(lastPayload, true); }
-    catch (e) { setStatus(e.message); }
+    try {
+      if (selectedIndex != null && lastImages[selectedIndex]) {
+        // Targeted replace: request 1 image and indicate which index to replace
+        const singlePayload = { ...lastPayload, batch: 1, __replaceIndex: selectedIndex };
+        runTextGeneration(singlePayload, true);
+      } else {
+        // No selection: full regen with last payload
+        runTextGeneration(lastPayload, true);
+      }
+    } catch (e) { setStatus(e.message); }
   });
 })();

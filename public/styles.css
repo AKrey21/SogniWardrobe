@@ -484,6 +484,30 @@
   transform: translateY(-1px);
 }
 
+/* Selected result tile highlight + animation */
+@keyframes selectPulse {
+  0%   { transform: scale(0.96); opacity: 0.6; }
+  100% { transform: scale(1);    opacity: 1;   }
+}
+
+.result-selected {
+  position: relative; /* ensure the overlay is positioned correctly */
+}
+
+.result-selected::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;         /* match the rounded-2xl corners */
+  pointer-events: none;           /* don't block clicks */
+  border: 3px solid rgba(167, 139, 250, 0.95);    /* bright lavender ring */
+  box-shadow:
+    0 0 0 4px rgba(167, 139, 250, 0.25),         /* soft outer glow */
+    0 0 24px rgba(167, 139, 250, 0.35);          /* bloom */
+  animation: selectPulse 180ms ease-out;         /* quick "pop" */
+}
+
+
 /* ==========================================
    EMPTY STATE
    ========================================== */
