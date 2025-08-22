@@ -14,20 +14,8 @@ router.options("/analyze-items", (req, res) => {
   res.status(204).end();
 });
 
-/* ---------- Per-user/IP in-flight guard ---------- */
-const inflight = new Map();
-const keyFromReq = (req) =>
-  (req.headers["x-user-id"] || req.headers["x-forwarded-for"] || req.ip || "global").toString();
-
 /* Analyze images and return list of items */
 router.post("/analyze-items", upload.array("image_files", 5), async (req, res) => {
-  const key = keyFromReq(req);
-  if (inflight.has(key)) {
-    res.setHeader("Retry-After", "5");
-    return res.status(429).json({ error: "Another analysis is still running. Please wait and try again." });
-  }
-  inflight.set(key, true);
-
   try {
     if (!req.files || !req.files.length) {
       return res.status(400).json({ error: "At least one image file is required." });
@@ -40,10 +28,8 @@ router.post("/analyze-items", upload.array("image_files", 5), async (req, res) =
 
     res.json({ items: identifiedItems });
   } catch (err) {
-    console.error("ANALYZE_ITEMS_ERROR", { message: err?.message, stack: err?.stack });
+    console.error("Analysis error:", err);
     res.status(500).json({ error: "Server error while analyzing items." });
-  } finally {
-    inflight.delete(key);
   }
 });
 
