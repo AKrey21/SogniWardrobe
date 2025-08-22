@@ -11,10 +11,9 @@ Frontend lives in `public/`. Backend (Express API + prompts + Sogni client) live
 ## ✨ Features
 
 - **Text‑to‑Lookbook generation** via Sogni (username/password — no API key).
-- **Style presets** (extendable): Casual, Streetwear, Y2K, Office, Techwear, etc.
+- **Style presets** (extendable): Casual, Streetwear, Formal;, CottageCore, etc.
 - **Garment focus**: keep a key item (e.g., “long baggy denim jorts”) centered in the fit.
 - **Body/complexion aware phrasing**: optional `heightCm`, `weightKg`, `race`, `complexion`.
-- **Color‑lock negatives** to avoid color drift (e.g., white → ivory).
 - **Batch generation** with gallery grid.
 - **Click‑to‑select & Regenerate**: re‑roll only the images you select.
 - **Wardrobe UI**: tile layout with selection highlight and a “closet reveal” animation.
