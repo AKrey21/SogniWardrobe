@@ -3,11 +3,9 @@ const express = require('express');
 const generateRouter = require('../src/routes/generate'); 
 
 const app = express();
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '2mb' }));
 
-// Your router already defines `router.post('/generate', ...)`,
-// so mounting it at `/api` keeps your front-end fetch('/api/generate') working.
-app.use('/api', generateRouter);
+// Mount at root so this function responds at /api/generate
+app.use('/', generateRouter);
 
-// Hand off to Express
 module.exports = (req, res) => app(req, res);
